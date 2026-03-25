@@ -54,14 +54,16 @@ export function Navbar() {
 
         {/* CTA */}
         <div className="hidden md:flex items-center">
-          <Button
-            variant="outline"
-            size="sm"
-            className="gap-2 border-[#D1D5DB] text-[#1E3A5F] text-sm font-medium rounded-full px-4"
-          >
-            <User size={14} />
-            Soy usuario registrado
-          </Button>
+          <Link href="/login">
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2 border-[#D1D5DB] text-[#1E3A5F] text-sm font-medium rounded-full px-4"
+            >
+              <User size={14} />
+              Iniciar sesión
+            </Button>
+          </Link>
         </div>
 
         {/* Mobile toggle */}
@@ -91,10 +93,12 @@ export function Navbar() {
             </Link>
           ))}
           <div className="pt-2 border-t border-[#E5E7EB]">
-            <Button variant="outline" size="sm" className="w-full gap-2 border-[#D1D5DB] text-[#1E3A5F]">
-              <User size={14} />
-              Soy usuario registrado
-            </Button>
+            <Link href="/login" onClick={() => setOpen(false)}>
+              <Button variant="outline" size="sm" className="w-full gap-2 border-[#D1D5DB] text-[#1E3A5F]">
+                <User size={14} />
+                Iniciar sesión
+              </Button>
+            </Link>
           </div>
         </nav>
       </div>

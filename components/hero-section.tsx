@@ -9,7 +9,7 @@ export function HeroSection() {
         {/* Badge */}
         <div className="mb-6">
           <span className="inline-block text-xs font-medium px-3 py-1 rounded-full bg-[#EEF2FF] text-[#8B5CF6] border border-[#C4B5FD]">
-            Proyecto de Tesis · Setiembre 2025 – Febrero 2026
+            Garantizando el seguimiento pedagógico.
           </span>
         </div>
 
@@ -30,25 +30,9 @@ export function HeroSection() {
               seguimiento pedagógico de estudiantes con discapacidad auditiva.
             </p>
 
-            <div className="flex flex-wrap gap-3 mb-5">
-              <Button
-                className="gap-2 bg-[#1E3A5F] hover:bg-[#16304f] text-white text-sm font-semibold rounded-md px-5 py-2.5"
-              >
-                <LayoutDashboard size={15} />
-                Iniciar sesión en la plataforma
-              </Button>
-              <Button
-                variant="outline"
-                className="gap-2 border-[#1E3A5F] text-[#1E3A5F] hover:bg-[#F3F4F6] text-sm font-semibold rounded-md px-5 py-2.5"
-              >
-                <Play size={13} className="fill-[#1E3A5F]" />
-                Ver recorrido del sistema
-              </Button>
-            </div>
-
             <p className="flex items-center gap-2 text-xs text-[#9CA3AF]">
               <ShieldCheck size={13} className="text-[#6B7280]" />
-              Acceso seguro para Docentes, Familias y Equipo SAANEE. Interfaz accesible y compatible con LSP.
+              Acceso seguro para Docentes, Familias y Equipo SAANEE.
             </p>
           </div>
 
@@ -62,12 +46,6 @@ export function HeroSection() {
                 className="object-cover"
                 priority
               />
-            </div>
-
-            {/* Top-right badge */}
-            <div className="absolute -top-3 right-4 bg-white rounded-lg shadow-md border border-[#E5E7EB] px-3 py-2 flex items-center gap-2">
-              <CheckCircle2 size={14} className="text-[#22C55E]" />
-              <span className="text-xs font-semibold text-[#374151]">Lengua de Señas Peruana (LSP)</span>
             </div>
 
             {/* Bottom badges */}
