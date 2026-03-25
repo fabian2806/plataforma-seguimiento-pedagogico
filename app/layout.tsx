@@ -1,14 +1,14 @@
 import type { Metadata } from 'next'
-import { Geist, Geist_Mono } from 'next/font/google'
+import { Inter, Plus_Jakarta_Sans } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 
-const _geist = Geist({ subsets: ["latin"] });
-const _geistMono = Geist_Mono({ subsets: ["latin"] });
+const inter = Inter({ subsets: ['latin'], variable: '--font-sans' })
+const plusJakarta = Plus_Jakarta_Sans({ subsets: ['latin'], variable: '--font-heading' })
 
 export const metadata: Metadata = {
-  title: 'v0 App',
-  description: 'Created with v0',
+  title: 'SignaEdu — Seguimiento Pedagógico Inclusivo',
+  description: 'Plataforma digital de seguimiento pedagógico para estudiantes con discapacidad auditiva. Conecta padres, docentes y especialistas SAANEE en una sola plataforma.',
   generator: 'v0.app',
   icons: {
     icon: [
@@ -35,8 +35,8 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
-      <body className="font-sans antialiased">
+    <html lang="es">
+      <body className={`${inter.variable} ${plusJakarta.variable} font-sans antialiased`}>
         {children}
         <Analytics />
       </body>
