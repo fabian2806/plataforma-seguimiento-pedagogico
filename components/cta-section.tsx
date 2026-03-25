@@ -1,114 +1,36 @@
-import { Button } from "@/components/ui/button"
-import { ArrowRight, Mail, Phone, MapPin } from "lucide-react"
+import { Mail } from "lucide-react"
 
 export function CtaSection() {
   return (
-    <>
-      {/* CTA */}
-      <section className="py-24 bg-background">
-        <div className="max-w-4xl mx-auto px-6 text-center">
-          <div
-            className="rounded-3xl px-10 py-20"
-            style={{ background: "var(--hero-bg)" }}
+    <footer id="contacto" className="bg-white border-t border-[#E5E7EB] py-10">
+      <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
+        {/* Left: brand + institution */}
+        <div className="flex items-start gap-4">
+          <div className="w-10 h-10 rounded-full bg-[#1E3A5F] flex items-center justify-center flex-shrink-0">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
+            </svg>
+          </div>
+          <div>
+            <p className="text-sm font-bold text-[#1E3A5F]">SignaEdu</p>
+            <p className="text-xs text-[#6B7280] mt-0.5">Facultad de Ciencias e Ingeniería</p>
+            <p className="text-xs text-[#9CA3AF]">Proyecto de Tesis · Lima, Perú · Setiembre 2025 – Febrero 2026</p>
+          </div>
+        </div>
+
+        {/* Right: contact */}
+        <div className="text-left md:text-right">
+          <p className="text-xs font-semibold text-[#374151] mb-1">Contacto del proyecto</p>
+          <p className="text-sm font-semibold text-[#1E3A5F]">Fabián Alejandro Montenegro Rufasto</p>
+          <a
+            href="mailto:fmontenegro@pucp.edu.pe"
+            className="flex items-center gap-1.5 mt-1 text-xs text-[#3B82F6] hover:underline md:justify-end"
           >
-            <p className="text-sm font-semibold tracking-widest uppercase mb-4" style={{ color: "oklch(0.72 0.16 60)" }}>
-              Empieza hoy
-            </p>
-            <h2
-              className="text-4xl lg:text-5xl font-extrabold text-white text-balance leading-tight mb-6"
-              style={{ fontFamily: "var(--font-heading)" }}
-            >
-              Transforma el seguimiento
-              pedagogico de tu institucion
-            </h2>
-            <p className="text-lg leading-relaxed mb-10 max-w-2xl mx-auto" style={{ color: "oklch(0.75 0.03 210)" }}>
-              Solicita una demo gratuita y descubre como SignaEdu puede mejorar la comunicacion
-              y el seguimiento de tus estudiantes con discapacidad auditiva.
-            </p>
-            <div className="flex flex-wrap justify-center gap-4">
-              <Button
-                size="lg"
-                className="rounded-full px-10 gap-2 font-semibold text-base"
-                style={{ background: "oklch(0.72 0.16 60)", color: "oklch(0.15 0.02 220)" }}
-              >
-                Solicitar demo gratuita
-                <ArrowRight size={18} />
-              </Button>
-              <Button
-                variant="outline"
-                size="lg"
-                className="rounded-full px-10 font-semibold text-base border-white/30 text-white hover:bg-white/10"
-              >
-                Hablar con el equipo
-              </Button>
-            </div>
-          </div>
+            <Mail size={12} />
+            fmontenegro@pucp.edu.pe
+          </a>
         </div>
-      </section>
-
-      {/* Contact */}
-      <section id="contacto" className="py-16" style={{ background: "var(--section-alt)" }}>
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid md:grid-cols-3 gap-10 text-center md:text-left">
-            {[
-              { icon: Mail, label: "Correo", value: "contacto@signaedu.pe" },
-              { icon: Phone, label: "Telefono", value: "+51 (01) 234-5678" },
-              { icon: MapPin, label: "Ubicacion", value: "Lima, Peru" },
-            ].map(({ icon: Icon, label, value }) => (
-              <div key={label} className="flex flex-col md:flex-row items-center md:items-start gap-4">
-                <div
-                  className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
-                  style={{ background: "oklch(0.42 0.12 210 / 0.1)" }}
-                >
-                  <Icon size={20} style={{ color: "oklch(0.42 0.12 210)" }} />
-                </div>
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-1">{label}</p>
-                  <p className="font-semibold text-foreground">{value}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer
-        className="border-t border-border py-10"
-        style={{ background: "var(--hero-bg)" }}
-      >
-        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M18 8h1a4 4 0 0 1 0 8h-1" />
-                <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z" />
-                <line x1="6" y1="1" x2="6" y2="4" />
-                <line x1="10" y1="1" x2="10" y2="4" />
-                <line x1="14" y1="1" x2="14" y2="4" />
-              </svg>
-            </div>
-            <span className="text-white font-bold" style={{ fontFamily: "var(--font-heading)" }}>
-              Signa<span style={{ color: "oklch(0.72 0.16 60)" }}>Edu</span>
-            </span>
-          </div>
-          <p className="text-sm" style={{ color: "oklch(0.55 0.03 210)" }}>
-            © 2025 SignaEdu. Plataforma de seguimiento pedagogico inclusivo.
-          </p>
-          <div className="flex gap-6">
-            {["Privacidad", "Terminos", "Soporte"].map((link) => (
-              <a
-                key={link}
-                href="#"
-                className="text-sm hover:text-white transition-colors"
-                style={{ color: "oklch(0.55 0.03 210)" }}
-              >
-                {link}
-              </a>
-            ))}
-          </div>
-        </div>
-      </footer>
-    </>
+      </div>
+    </footer>
   )
 }
