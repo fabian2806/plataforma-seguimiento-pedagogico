@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { Eye, EyeOff, ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -9,14 +10,15 @@ import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 
 export default function LoginPage() {
+  const router = useRouter()
   const [showPassword, setShowPassword] = useState(false)
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    // Handle login logic here
-    console.log("Login attempt:", { email, password })
+    // For now, just redirect to dashboard (no auth validation)
+    router.push("/dashboard")
   }
 
   return (
@@ -190,6 +192,7 @@ export default function LoginPage() {
               <button
                 key={role.label}
                 type="button"
+                onClick={() => router.push("/dashboard")}
                 className="flex flex-col items-center gap-2 p-4 rounded-xl border border-[#E5E7EB] bg-white hover:border-[#3B82F6] hover:bg-[#EFF6FF] transition-colors group"
               >
                 <svg
