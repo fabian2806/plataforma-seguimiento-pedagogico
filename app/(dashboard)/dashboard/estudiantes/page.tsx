@@ -248,15 +248,26 @@ export default function EstudiantesPage() {
                 </div>
               </div>
 
-              <Link href={`/dashboard/estudiantes/${student.id}`}>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full mt-3 text-[#3B82F6] border-[#3B82F6] hover:bg-[#EEF2FF]"
-                >
-                  Ver expediente
-                </Button>
-              </Link>
+              <div className="flex gap-2 mt-3">
+                <Link href={`/dashboard/estudiantes/${student.id}?tab=perfil`} className="flex-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full text-[#6B7280] hover:text-[#1E3A5F] hover:bg-[#F3F4F6]"
+                  >
+                    Ver perfil
+                  </Button>
+                </Link>
+                <Link href={`/dashboard/estudiantes/${student.id}`} className="flex-1">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full text-[#3B82F6] border-[#3B82F6] hover:bg-[#EEF2FF]"
+                  >
+                    Ver expediente
+                  </Button>
+                </Link>
+              </div>
             </CardContent>
           </Card>
         ))}
