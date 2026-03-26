@@ -147,6 +147,41 @@ const bitacoraEntries = [
       },
     ],
   },
+  {
+    id: "7",
+    date: "10 Mar 2025",
+    time: "6:45 PM",
+    author: "Elena Pérez",
+    role: "Familia",
+    type: "comunicacion_familiar",
+    title: "Consulta sobre tarea de comunicación",
+    content:
+      "Buenas tardes, Sofía tuvo dificultad con la tarea de lectura de labios. En casa practicamos pero quisiera saber si hay algún material adicional que podamos usar. Gracias.",
+    attachments: [],
+    replies: [
+      {
+        author: "Prof. María Castro",
+        role: "Docente",
+        date: "11 Mar 2025",
+        time: "9:00 AM",
+        content:
+          "Estimada Elena, le comparto un video tutorial con ejercicios de lectura labial. Puede practicar 10 minutos diarios. Sofía responde muy bien cuando se combina con señas.",
+        attachments: [{ name: "Tutorial_Lectura_Labial.mp4", size: "45 MB" }],
+      },
+    ],
+  },
+  {
+    id: "8",
+    date: "8 Mar 2025",
+    time: "11:20 AM",
+    author: "Prof. María Castro",
+    role: "Docente",
+    type: "incidencia",
+    title: "Dificultad de comunicación en actividad grupal",
+    content:
+      "Durante la actividad grupal de ciencias, Sofía tuvo dificultad para seguir las instrucciones debido a que sus compañeros hablaban simultáneamente. Se generó frustración momentánea. Se intervino reubicando al grupo y usando señas de apoyo. Se recomienda reforzar protocolo de turnos de habla con el grupo.",
+    attachments: [],
+  },
 ]
 
 const upcomingEvents = [
@@ -180,6 +215,10 @@ function getEntryTypeColor(type: string) {
       return { bg: "bg-[#F3F4F6]", border: "border-[#E5E7EB]", text: "text-[#374151]", label: "Documento adjuntado" }
     case "feedback_saanee":
       return { bg: "bg-[#FDF2F8]", border: "border-[#FBCFE8]", text: "text-[#DB2777]", label: "Feedback SAANEE" }
+    case "comunicacion_familiar":
+      return { bg: "bg-[#E0F2FE]", border: "border-[#BAE6FD]", text: "text-[#0284C7]", label: "Comunicación familiar" }
+    case "incidencia":
+      return { bg: "bg-[#FEF2F2]", border: "border-[#FECACA]", text: "text-[#DC2626]", label: "Incidencia de comunicación" }
     default:
       return { bg: "bg-[#F3F4F6]", border: "border-[#E5E7EB]", text: "text-[#6B7280]", label: "Otro" }
   }
