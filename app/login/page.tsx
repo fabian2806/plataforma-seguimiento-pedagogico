@@ -17,6 +17,7 @@ export default function LoginPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    console.log("[v0] Login form submitted, redirecting to dashboard...")
     // For now, just redirect to dashboard (no auth validation)
     router.push("/dashboard")
   }
