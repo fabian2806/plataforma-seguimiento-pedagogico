@@ -13,7 +13,7 @@ export function CtaSection() {
           </div>
           <div>
             <p className="text-sm font-bold text-[#1E3A5F]">SignaEdu</p>
-            <p className="text-xs text-[#6B7280] mt-0.5">Facultad de Ciencias e Ingeniería</p>
+            <p className="text-xs text-[#6B7280] mt-0.5">PUCP · Facultad de Ciencias e Ingeniería</p>
             <p className="text-xs text-[#9CA3AF]">Proyecto de Tesis · Lima, Perú · Setiembre 2025 – Junio 2026</p>
           </div>
         </div>
