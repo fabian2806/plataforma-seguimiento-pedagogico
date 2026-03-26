@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { Bell, Search } from "lucide-react"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Button } from "@/components/ui/button"
@@ -14,6 +15,18 @@ import {
 } from "@/components/ui/dropdown-menu"
 
 export function DashboardTopbar() {
+  const [currentDate, setCurrentDate] = useState<string>("")
+
+  useEffect(() => {
+    setCurrentDate(
+      new Date().toLocaleDateString("es-PE", {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+      })
+    )
+  }, [])
+
   return (
     <header className="sticky top-0 z-10 flex h-14 items-center gap-4 border-b border-[#E5E7EB] bg-white px-4">
       <SidebarTrigger className="text-[#6B7280] hover:text-[#1E3A5F]" />
@@ -59,13 +72,11 @@ export function DashboardTopbar() {
       </DropdownMenu>
 
       {/* Current date */}
-      <div className="hidden sm:block text-xs text-[#6B7280]">
-        {new Date().toLocaleDateString("es-PE", {
-          weekday: "long",
-          day: "numeric",
-          month: "long",
-        })}
-      </div>
+      {currentDate && (
+        <div className="hidden sm:block text-xs text-[#6B7280]">
+          {currentDate}
+        </div>
+      )}
     </header>
   )
 }
