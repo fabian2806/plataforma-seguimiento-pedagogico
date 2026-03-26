@@ -166,7 +166,7 @@ export default function LoginPage() {
               type="submit"
               className="w-full h-11 bg-[#1E3A5F] hover:bg-[#2D4A6F] text-white font-medium transition-colors"
             >
-              Iniciar sesiónn
+              Iniciar sesión
             </Button>
           </form>
 
