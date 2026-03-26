@@ -1,9 +1,12 @@
+"use client"
+
 import { Users, Calendar, FileText, Bell, TrendingUp, Clock, Mail, Phone } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
+import { useAuth, getRoleDisplayName, getRoleColor } from "@/lib/auth"
 
 // Mock data - in production this would come from the database
 const stats = [
@@ -113,43 +116,53 @@ const recentActivity = [
 ]
 
 export default function DashboardPage() {
+  const { user } = useAuth()
+  const roleColor = getRoleColor(user?.role || "docente")
+  const firstName = user?.name?.split(" ")[0] || "Usuario"
+
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
         <div className="space-y-3">
           <div>
-            <h1 className="text-2xl font-bold text-[#1E3A5F]">Bienvenida, María</h1>
+            <h1 className="text-2xl font-bold text-[#1E3A5F]">
+              {user?.role === "padre" ? "Bienvenido/a" : "Bienvenida"}, {firstName}
+            </h1>
             <p className="text-sm text-[#6B7280]">
-              Aquí tienes un resumen de tu actividad y estudiantes asignados.
+              {user?.role === "admin" && "Gestiona usuarios, estudiantes y reportes del sistema."}
+              {user?.role === "docente" && "Aquí tienes un resumen de tu actividad y estudiantes asignados."}
+              {user?.role === "padre" && "Sigue el progreso educativo de tu hijo/a."}
+              {user?.role === "saanee" && "Coordina el seguimiento de estudiantes con el equipo educativo."}
+              {!user?.role && "Aquí tienes un resumen de tu actividad."}
             </p>
           </div>
           {/* User info */}
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-[#6B7280]">
-            <span className="font-medium text-[#374151]">María Elena Castro</span>
+            <span className="font-medium text-[#374151]">{user?.name || "Usuario"}</span>
             <span className="hidden sm:inline text-[#D1D5DB]">|</span>
-            <span className="text-[#3B82F6]">Docente de Primaria</span>
+            <span className={roleColor.text}>{getRoleDisplayName(user?.role || "docente")}</span>
             <span className="hidden sm:inline text-[#D1D5DB]">|</span>
             <span className="flex items-center gap-1">
               <Mail size={11} className="text-[#9CA3AF]" />
-              mcastro@ie-sanmiguel.edu.pe
+              {user?.email || "usuario@signaedu.pe"}
             </span>
             <span className="hidden sm:inline text-[#D1D5DB]">|</span>
             <span className="flex items-center gap-1">
               <Phone size={11} className="text-[#9CA3AF]" />
-              987 654 321
+              {user?.phone || "---"}
             </span>
           </div>
         </div>
         <div className="flex gap-2 flex-shrink-0">
           <Link href="/dashboard/estudiantes">
             <Button variant="outline" className="border-[#E5E7EB] text-[#374151]">
-              Ver estudiantes
+              {user?.role === "padre" ? "Ver perfil" : "Ver estudiantes"}
             </Button>
           </Link>
           <Link href="/dashboard/eventos">
             <Button className="bg-[#1E3A5F] hover:bg-[#2D4A6F] text-white">
-              Nuevo evento
+              {user?.role === "padre" ? "Ver eventos" : "Nuevo evento"}
             </Button>
           </Link>
         </div>

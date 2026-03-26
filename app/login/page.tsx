@@ -3,23 +3,52 @@
 import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { Eye, EyeOff, ArrowLeft } from "lucide-react"
+import { Eye, EyeOff, ArrowLeft, AlertCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
+import { useAuth, MOCK_USERS } from "@/lib/auth"
 
 export default function LoginPage() {
   const router = useRouter()
+  const { login } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [error, setError] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    console.log("[v0] Login form submitted, redirecting to dashboard...")
-    // For now, just redirect to dashboard (no auth validation)
-    router.push("/dashboard")
+    setError("")
+    setIsLoading(true)
+
+    const result = await login(email, password)
+    
+    if (result.success) {
+      router.push("/dashboard")
+    } else {
+      setError(result.error || "Error al iniciar sesión")
+      setIsLoading(false)
+    }
+  }
+
+  const handleQuickLogin = async (role: "docente" | "saanee" | "padre") => {
+    const user = MOCK_USERS.find((u) => u.role === role)
+    if (user) {
+      setEmail(user.email)
+      setPassword(user.password)
+      setError("")
+      setIsLoading(true)
+      
+      const result = await login(user.email, user.password)
+      if (result.success) {
+        router.push("/dashboard")
+      } else {
+        setIsLoading(false)
+      }
+    }
   }
 
   return (
@@ -111,6 +140,14 @@ export default function LoginPage() {
             </p>
           </div>
 
+          {/* Error message */}
+          {error && (
+            <div className="mb-4 p-3 rounded-lg bg-[#FEF2F2] border border-[#FECACA] flex items-center gap-2">
+              <AlertCircle size={16} className="text-[#DC2626] flex-shrink-0" />
+              <p className="text-sm text-[#DC2626]">{error}</p>
+            </div>
+          )}
+
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
@@ -167,9 +204,10 @@ export default function LoginPage() {
 
             <Button
               type="submit"
-              className="w-full h-11 bg-[#1E3A5F] hover:bg-[#2D4A6F] text-white font-medium transition-colors"
+              disabled={isLoading}
+              className="w-full h-11 bg-[#1E3A5F] hover:bg-[#2D4A6F] text-white font-medium transition-colors disabled:opacity-50"
             >
-              Iniciar sesión
+              {isLoading ? "Ingresando..." : "Iniciar sesión"}
             </Button>
           </form>
 
@@ -186,15 +224,16 @@ export default function LoginPage() {
           {/* Role buttons */}
           <div className="grid grid-cols-3 gap-3">
             {[
-              { label: "Docente", icon: "M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" },
-              { label: "SAANEE", icon: "M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" },
-              { label: "Familia", icon: "M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" },
-            ].map((role) => (
+              { label: "Docente", role: "docente" as const, icon: "M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" },
+              { label: "SAANEE", role: "saanee" as const, icon: "M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" },
+              { label: "Familia", role: "padre" as const, icon: "M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" },
+            ].map((item) => (
               <button
-                key={role.label}
+                key={item.label}
                 type="button"
-                onClick={() => router.push("/dashboard")}
-                className="flex flex-col items-center gap-2 p-4 rounded-xl border border-[#E5E7EB] bg-white hover:border-[#3B82F6] hover:bg-[#EFF6FF] transition-colors group"
+                disabled={isLoading}
+                onClick={() => handleQuickLogin(item.role)}
+                className="flex flex-col items-center gap-2 p-4 rounded-xl border border-[#E5E7EB] bg-white hover:border-[#3B82F6] hover:bg-[#EFF6FF] transition-colors group disabled:opacity-50"
               >
                 <svg
                   width="24"
@@ -207,10 +246,10 @@ export default function LoginPage() {
                   strokeLinejoin="round"
                   className="text-[#9CA3AF] group-hover:text-[#3B82F6] transition-colors"
                 >
-                  <path d={role.icon} />
+                  <path d={item.icon} />
                 </svg>
                 <span className="text-xs font-medium text-[#6B7280] group-hover:text-[#1E3A5F] transition-colors">
-                  {role.label}
+                  {item.label}
                 </span>
               </button>
             ))}
