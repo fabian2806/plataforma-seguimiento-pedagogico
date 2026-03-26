@@ -67,7 +67,7 @@ const bitacoraEntries = [
     time: "10:30 AM",
     author: "Prof. María Castro",
     role: "Docente",
-    type: "observacion",
+    type: "observacion_pe",
     title: "Avance en lectoescritura",
     content:
       "Sofía mostró mejora significativa en la identificación de palabras nuevas. Logró leer correctamente 8 de 10 palabras del ejercicio. Se recomienda continuar con ejercicios de reconocimiento visual.",
@@ -75,50 +75,77 @@ const bitacoraEntries = [
   },
   {
     id: "2",
+    date: "21 Mar 2025",
+    time: "2:00 PM",
+    author: "Prof. María Castro",
+    role: "Docente",
+    type: "apoyo_ajuste",
+    title: "Ajuste de ubicación en el aula",
+    content:
+      "Se reubicó a Sofía en la primera fila, cerca de la ventana para mejor iluminación. Se implementó el uso de tarjetas visuales para instrucciones. Mejora notoria en la atención durante clase.",
+    attachments: [],
+  },
+  {
+    id: "3",
     date: "20 Mar 2025",
     time: "3:15 PM",
     author: "Esp. Roberto Quispe",
     role: "SAANEE",
-    type: "evaluacion",
-    title: "Evaluación mensual de comunicación",
+    type: "evaluacion_indicador",
+    title: "Evaluación de indicador: Comunicación expresiva",
     content:
-      "Se realizó evaluación de competencias comunicativas. Sofía demuestra dominio de 45 señas nuevas este mes. Vocabulario en LSP en nivel esperado para su edad. Área de oportunidad: expresión de emociones complejas.",
-    attachments: [{ name: "Evaluacion_Marzo_2025.pdf", size: "245 KB" }],
+      "Se evaluó el indicador COM-03: Expresión de necesidades básicas en LSP. Resultado: Logrado (85%). Sofía demuestra dominio de 45 señas nuevas este mes. Área de oportunidad: expresión de emociones complejas.",
+    attachments: [{ name: "Evaluacion_COM03_Marzo.pdf", size: "245 KB" }],
   },
   {
-    id: "3",
+    id: "4",
     date: "18 Mar 2025",
-    time: "11:00 AM",
-    author: "Elena Pérez",
-    role: "Familia",
-    type: "comunicacion",
-    title: "Consulta sobre tarea de matemáticas",
+    time: "9:00 AM",
+    author: "Sistema",
+    role: "Sistema",
+    type: "evento_agenda",
+    title: "Reunión trimestral con familia",
     content:
-      "Buenos días, Sofía tuvo dificultad con la tarea de sumas de dos dígitos. ¿Podría indicarnos cómo apoyarla en casa? Gracias.",
-    attachments: [],
+      "Evento programado completado. Asistentes: Elena Pérez (madre), Juan Rodríguez (padre), Prof. María Castro, Esp. Roberto Quispe. Se compartieron avances del trimestre y se establecieron metas.",
+    attachments: [{ name: "Acta_Reunion_18Mar.pdf", size: "120 KB" }],
+  },
+  {
+    id: "5",
+    date: "15 Mar 2025",
+    time: "11:30 AM",
+    author: "Prof. María Castro",
+    role: "Docente",
+    type: "documento",
+    title: "Informe de progreso mensual adjuntado",
+    content:
+      "Se adjunta el informe de progreso del mes de febrero 2025. Incluye evaluación de áreas: comunicación, matemáticas, socialización y autonomía.",
+    attachments: [
+      { name: "Informe_Progreso_Feb2025.pdf", size: "380 KB" },
+      { name: "Anexo_Evidencias.pdf", size: "1.2 MB" },
+    ],
+  },
+  {
+    id: "6",
+    date: "12 Mar 2025",
+    time: "4:00 PM",
+    author: "Esp. Roberto Quispe",
+    role: "SAANEE",
+    type: "feedback_saanee",
+    title: "Retroalimentación sobre estrategias de aula",
+    content:
+      "Excelente trabajo con las adaptaciones visuales implementadas. Recomiendo incorporar pausas activas con señas cada 20 minutos. Adjunto guía de actividades kinestésicas para complementar.",
+    attachments: [{ name: "Guia_Actividades_Kinestesicas.pdf", size: "290 KB" }],
     replies: [
       {
         author: "Prof. María Castro",
         role: "Docente",
-        date: "18 Mar 2025",
-        time: "2:00 PM",
+        date: "13 Mar 2025",
+        time: "8:30 AM",
         content:
-          "Estimada Elena, le recomiendo usar material concreto como bloques o fichas. Sofía responde muy bien a estímulos visuales. Adjunto una guía de apoyo.",
-        attachments: [{ name: "Guia_Matematicas_Visual.pdf", size: "180 KB" }],
+          "Gracias por la retroalimentación. Implementaré las pausas activas a partir de hoy. ¿Podríamos coordinar una observación de aula la próxima semana?",
+        attachments: [],
       },
     ],
-  },
-  {
-    id: "4",
-    date: "15 Mar 2025",
-    time: "9:00 AM",
-    author: "Prof. María Castro",
-    role: "Docente",
-    type: "evento",
-    title: "Reunión trimestral con familia",
-    content:
-      "Se realizó reunión con ambos padres. Se compartieron avances del trimestre y se establecieron metas para el siguiente período. Familia muy comprometida con el proceso educativo.",
-    attachments: [{ name: "Acta_Reunion_15Mar.pdf", size: "120 KB" }],
   },
 ]
 
@@ -141,16 +168,20 @@ const upcomingEvents = [
 
 function getEntryTypeColor(type: string) {
   switch (type) {
-    case "observacion":
-      return { bg: "bg-[#EEF2FF]", text: "text-[#3B82F6]", label: "Observación" }
-    case "evaluacion":
-      return { bg: "bg-[#F3E8FF]", text: "text-[#8B5CF6]", label: "Evaluación" }
-    case "comunicacion":
-      return { bg: "bg-[#D1FAE5]", text: "text-[#059669]", label: "Comunicación" }
-    case "evento":
-      return { bg: "bg-[#FEF3C7]", text: "text-[#D97706]", label: "Evento" }
+    case "observacion_pe":
+      return { bg: "bg-[#EEF2FF]", border: "border-[#C7D2FE]", text: "text-[#3B82F6]", label: "Observación PE" }
+    case "apoyo_ajuste":
+      return { bg: "bg-[#ECFDF5]", border: "border-[#A7F3D0]", text: "text-[#059669]", label: "Apoyo o ajuste" }
+    case "evaluacion_indicador":
+      return { bg: "bg-[#F3E8FF]", border: "border-[#DDD6FE]", text: "text-[#7C3AED]", label: "Evaluación de indicador" }
+    case "evento_agenda":
+      return { bg: "bg-[#FEF3C7]", border: "border-[#FDE68A]", text: "text-[#D97706]", label: "Evento de agenda" }
+    case "documento":
+      return { bg: "bg-[#F3F4F6]", border: "border-[#E5E7EB]", text: "text-[#374151]", label: "Documento adjuntado" }
+    case "feedback_saanee":
+      return { bg: "bg-[#FDF2F8]", border: "border-[#FBCFE8]", text: "text-[#DB2777]", label: "Feedback SAANEE" }
     default:
-      return { bg: "bg-[#F3F4F6]", text: "text-[#6B7280]", label: "Otro" }
+      return { bg: "bg-[#F3F4F6]", border: "border-[#E5E7EB]", text: "text-[#6B7280]", label: "Otro" }
   }
 }
 
@@ -359,8 +390,9 @@ export default function ExpedientePage() {
                 <Tabs defaultValue="all" className="w-auto">
                   <TabsList className="bg-[#F3F4F6] h-8">
                     <TabsTrigger value="all" className="text-xs h-6 px-3">Todas</TabsTrigger>
-                    <TabsTrigger value="observacion" className="text-xs h-6 px-3">Observaciones</TabsTrigger>
-                    <TabsTrigger value="comunicacion" className="text-xs h-6 px-3">Comunicación</TabsTrigger>
+                    <TabsTrigger value="observacion_pe" className="text-xs h-6 px-3">Observaciones</TabsTrigger>
+                    <TabsTrigger value="evaluacion_indicador" className="text-xs h-6 px-3">Evaluaciones</TabsTrigger>
+                    <TabsTrigger value="feedback_saanee" className="text-xs h-6 px-3">SAANEE</TabsTrigger>
                   </TabsList>
                 </Tabs>
               </div>
@@ -415,7 +447,7 @@ export default function ExpedientePage() {
 
                         {/* Content */}
                         <div className="flex-1 pb-4">
-                          <div className="p-4 rounded-lg border border-[#E5E7EB] bg-white">
+                          <div className={`p-4 rounded-lg border-l-4 border ${typeStyle.border} ${typeStyle.bg} bg-opacity-30`}>
                             <div className="flex items-start justify-between mb-2">
                               <div>
                                 <div className="flex items-center gap-2 mb-1">
