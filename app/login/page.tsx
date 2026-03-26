@@ -78,8 +78,8 @@ export default function LoginPage() {
       <div className="flex-1 flex flex-col justify-center px-6 py-12 lg:px-16">
         <div className="w-full max-w-md mx-auto">
           {/* Back link - mobile only */}
-          <Link 
-            href="/" 
+          <Link
+            href="/"
             className="inline-flex items-center gap-2 text-sm text-[#6B7280] hover:text-[#1E3A5F] mb-8 transition-colors lg:hidden"
           >
             <ArrowLeft size={16} />
@@ -166,7 +166,7 @@ export default function LoginPage() {
               type="submit"
               className="w-full h-11 bg-[#1E3A5F] hover:bg-[#2D4A6F] text-white font-medium transition-colors"
             >
-              Iniciar sesión
+              Iniciar sesiónn
             </Button>
           </form>
 
@@ -192,14 +192,14 @@ export default function LoginPage() {
                 type="button"
                 className="flex flex-col items-center gap-2 p-4 rounded-xl border border-[#E5E7EB] bg-white hover:border-[#3B82F6] hover:bg-[#EFF6FF] transition-colors group"
               >
-                <svg 
-                  width="24" 
-                  height="24" 
-                  viewBox="0 0 24 24" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  strokeWidth="1.5" 
-                  strokeLinecap="round" 
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
                   strokeLinejoin="round"
                   className="text-[#9CA3AF] group-hover:text-[#3B82F6] transition-colors"
                 >
