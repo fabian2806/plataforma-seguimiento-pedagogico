@@ -14,7 +14,7 @@ export function CtaSection() {
           <div>
             <p className="text-sm font-bold text-[#1E3A5F]">SignaEdu</p>
             <p className="text-xs text-[#6B7280] mt-0.5">Facultad de Ciencias e Ingeniería</p>
-            <p className="text-xs text-[#9CA3AF]">Proyecto de Tesis · Lima, Perú · Setiembre 2025 – Febrero 2026</p>
+            <p className="text-xs text-[#9CA3AF]">Proyecto de Tesis · Lima, Perú · Setiembre 2025 – Junio 2026</p>
           </div>
         </div>
 
@@ -27,7 +27,7 @@ export function CtaSection() {
             className="flex items-center gap-1.5 mt-1 text-xs text-[#3B82F6] hover:underline md:justify-end"
           >
             <Mail size={12} />
-            fmontenegro@pucp.edu.pe
+            a20210834@pucp.edu.pe
           </a>
         </div>
       </div>
