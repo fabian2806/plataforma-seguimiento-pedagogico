@@ -1,5 +1,6 @@
 "use client"
 
+import { use } from "react"
 import Link from "next/link"
 import {
   ArrowLeft,
@@ -13,6 +14,9 @@ import {
   GraduationCap,
   Ear,
   MessageSquare,
+  ShieldAlert,
+  HandHelping,
+  Star,
 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -69,7 +73,84 @@ const academicHistory = [
   { year: "2023", grade: "1° Primaria", status: "Aprobado" },
 ]
 
-export default function ProfilePage({ params }: { params: { id: string } }) {
+// Barreras
+const barreras = [
+  {
+    tipo: "Comunicación",
+    descripcion: "Dificultad para comprender instrucciones orales largas sin apoyo visual",
+    color: { bg: "#FEF2F2", border: "#FECACA", text: "#DC2626" },
+  },
+  {
+    tipo: "Ambiente",
+    descripcion: "Espacios con ruido excesivo dificultan el uso efectivo del audífono",
+    color: { bg: "#FEF3C7", border: "#FDE68A", text: "#D97706" },
+  },
+  {
+    tipo: "Actitudinal",
+    descripcion: "Algunos compañeros desconocen la LSP, limitando interacción social",
+    color: { bg: "#F3E8FF", border: "#DDD6FE", text: "#7C3AED" },
+  },
+]
+
+// Apoyos
+const apoyos = [
+  {
+    tipo: "Tecnológico",
+    descripcion: "Audífono bilateral Phonak Sky M70 con conectividad bluetooth",
+    color: { bg: "#EEF2FF", border: "#C7D2FE", text: "#4F46E5" },
+  },
+  {
+    tipo: "Humano",
+    descripcion: "Intérprete de LSP disponible 3 días por semana",
+    color: { bg: "#ECFDF5", border: "#A7F3D0", text: "#059669" },
+  },
+  {
+    tipo: "Pedagógico",
+    descripcion: "Material visual adaptado y ubicación preferencial en el aula",
+    color: { bg: "#FFF7ED", border: "#FED7AA", text: "#EA580C" },
+  },
+  {
+    tipo: "Familiar",
+    descripcion: "Madre con conocimiento avanzado de LSP, refuerzo en casa",
+    color: { bg: "#FDF2F8", border: "#FBCFE8", text: "#DB2777" },
+  },
+]
+
+// Fortalezas
+const fortalezas = [
+  {
+    tipo: "Cognitiva",
+    descripcion: "Excelente memoria visual y capacidad de abstracción",
+    funcion: "Aprendizaje",
+    intensidad: "Alta",
+    color: { bg: "#ECFDF5", border: "#A7F3D0", text: "#059669" },
+  },
+  {
+    tipo: "Social",
+    descripcion: "Facilidad para establecer vínculos y trabajar en equipo",
+    funcion: "Relación interpersonal",
+    intensidad: "Alta",
+    color: { bg: "#EEF2FF", border: "#C7D2FE", text: "#4F46E5" },
+  },
+  {
+    tipo: "Comunicativa",
+    descripcion: "Dominio fluido de LSP y lectura labial básica",
+    funcion: "Expresión",
+    intensidad: "Media-Alta",
+    color: { bg: "#FFF7ED", border: "#FED7AA", text: "#EA580C" },
+  },
+  {
+    tipo: "Emocional",
+    descripcion: "Alta resiliencia y actitud positiva frente a desafíos",
+    funcion: "Autorregulación",
+    intensidad: "Alta",
+    color: { bg: "#FDF2F8", border: "#FBCFE8", text: "#DB2777" },
+  },
+]
+
+export default function ProfilePage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params)
+  
   return (
     <div className="p-6 space-y-6">
       {/* Back button and header */}
@@ -87,7 +168,7 @@ export default function ProfilePage({ params }: { params: { id: string } }) {
             Información personal y datos del estudiante
           </p>
         </div>
-        <Link href={`/dashboard/estudiantes/${params.id}`}>
+        <Link href={`/dashboard/estudiantes/${id}`}>
           <Button className="gap-2 bg-[#1E3A5F] hover:bg-[#2D4A6F] text-white">
             <FileText size={16} />
             Ver expediente
@@ -175,6 +256,122 @@ export default function ProfilePage({ params }: { params: { id: string } }) {
                   <p className="text-sm text-[#374151] font-medium">{student.diagnosisDate}</p>
                 </div>
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Barreras */}
+          <Card className="border-[#E5E7EB]">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base font-semibold text-[#1E3A5F] flex items-center gap-2">
+                <ShieldAlert size={18} className="text-[#DC2626]" />
+                Barreras identificadas
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {barreras.map((item, idx) => (
+                <div
+                  key={idx}
+                  className="p-3 rounded-lg border"
+                  style={{ backgroundColor: item.color.bg, borderColor: item.color.border }}
+                >
+                  <div className="flex items-start gap-3">
+                    <Badge
+                      variant="outline"
+                      className="text-[10px] font-semibold shrink-0"
+                      style={{
+                        borderColor: item.color.text,
+                        color: item.color.text,
+                        backgroundColor: "white",
+                      }}
+                    >
+                      {item.tipo}
+                    </Badge>
+                    <p className="text-sm text-[#374151]">{item.descripcion}</p>
+                  </div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+
+          {/* Apoyos */}
+          <Card className="border-[#E5E7EB]">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base font-semibold text-[#1E3A5F] flex items-center gap-2">
+                <HandHelping size={18} className="text-[#059669]" />
+                Apoyos disponibles
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {apoyos.map((item, idx) => (
+                <div
+                  key={idx}
+                  className="p-3 rounded-lg border"
+                  style={{ backgroundColor: item.color.bg, borderColor: item.color.border }}
+                >
+                  <div className="flex items-start gap-3">
+                    <Badge
+                      variant="outline"
+                      className="text-[10px] font-semibold shrink-0"
+                      style={{
+                        borderColor: item.color.text,
+                        color: item.color.text,
+                        backgroundColor: "white",
+                      }}
+                    >
+                      {item.tipo}
+                    </Badge>
+                    <p className="text-sm text-[#374151]">{item.descripcion}</p>
+                  </div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+
+          {/* Fortalezas */}
+          <Card className="border-[#E5E7EB]">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base font-semibold text-[#1E3A5F] flex items-center gap-2">
+                <Star size={18} className="text-[#F59E0B]" />
+                Fortalezas
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {fortalezas.map((item, idx) => (
+                <div
+                  key={idx}
+                  className="p-3 rounded-lg border"
+                  style={{ backgroundColor: item.color.bg, borderColor: item.color.border }}
+                >
+                  <div className="flex items-start justify-between gap-3 mb-2">
+                    <Badge
+                      variant="outline"
+                      className="text-[10px] font-semibold shrink-0"
+                      style={{
+                        borderColor: item.color.text,
+                        color: item.color.text,
+                        backgroundColor: "white",
+                      }}
+                    >
+                      {item.tipo}
+                    </Badge>
+                    <div className="flex gap-2">
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-white text-[#6B7280] border border-[#E5E7EB]">
+                        {item.funcion}
+                      </span>
+                      <span
+                        className="text-[10px] px-2 py-0.5 rounded-full font-medium"
+                        style={{
+                          backgroundColor: item.color.text,
+                          color: "white",
+                        }}
+                      >
+                        {item.intensidad}
+                      </span>
+                    </div>
+                  </div>
+                  <p className="text-sm text-[#374151]">{item.descripcion}</p>
+                </div>
+              ))}
             </CardContent>
           </Card>
 
