@@ -1,12 +1,15 @@
 "use client"
 
 import { useState } from "react"
-import Link from "next/link"
-import { Calendar, Plus, Clock, MapPin, Users, ChevronLeft, ChevronRight, Video, User } from "lucide-react"
+import { Calendar, Plus, Clock, MapPin, ChevronLeft, ChevronRight, Video, User, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Label } from "@/components/ui/label"
 
 // Mock events data
 const events = [
@@ -109,8 +112,26 @@ function getStatusStyle(status: string) {
   }
 }
 
+// Students for selection
+const students = [
+  { id: "1", name: "Sofía Rodríguez", grade: "3° Primaria" },
+  { id: "2", name: "Carlos Mendoza", grade: "4° Primaria" },
+  { id: "3", name: "Ana Torres", grade: "2° Primaria" },
+]
+
 export default function EventosPage() {
   const [currentWeek, setCurrentWeek] = useState(0)
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [newEvent, setNewEvent] = useState({
+    title: "",
+    type: "",
+    date: "",
+    time: "",
+    duration: "30",
+    location: "",
+    student: "",
+    description: "",
+  })
 
   // Get current week dates
   const today = new Date()
@@ -142,7 +163,10 @@ export default function EventosPage() {
             Gestiona reuniones, evaluaciones y actividades programadas.
           </p>
         </div>
-        <Button className="gap-2 bg-[#1E3A5F] hover:bg-[#2D4A6F] text-white">
+        <Button 
+          className="gap-2 bg-[#1E3A5F] hover:bg-[#2D4A6F] text-white"
+          onClick={() => setIsDialogOpen(true)}
+        >
           <Plus size={16} />
           Nuevo evento
         </Button>
@@ -327,6 +351,167 @@ export default function EventosPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* New Event Dialog */}
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-semibold text-[#1E3A5F]">
+              Nuevo evento
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4 pt-2">
+            {/* Title */}
+            <div className="space-y-1.5">
+              <Label htmlFor="title" className="text-sm text-[#374151]">Título</Label>
+              <Input
+                id="title"
+                placeholder="Ej: Reunión con familia"
+                value={newEvent.title}
+                onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })}
+                className="border-[#E5E7EB]"
+              />
+            </div>
+
+            {/* Type and Student */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label className="text-sm text-[#374151]">Tipo de evento</Label>
+                <Select
+                  value={newEvent.type}
+                  onValueChange={(value) => setNewEvent({ ...newEvent, type: value })}
+                >
+                  <SelectTrigger className="border-[#E5E7EB]">
+                    <SelectValue placeholder="Seleccionar" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="reunion_familiar">Reunión familiar</SelectItem>
+                    <SelectItem value="evaluacion">Evaluación</SelectItem>
+                    <SelectItem value="capacitacion">Capacitación</SelectItem>
+                    <SelectItem value="observacion">Observación de aula</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-sm text-[#374151]">Estudiante (opcional)</Label>
+                <Select
+                  value={newEvent.student}
+                  onValueChange={(value) => setNewEvent({ ...newEvent, student: value })}
+                >
+                  <SelectTrigger className="border-[#E5E7EB]">
+                    <SelectValue placeholder="Seleccionar" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {students.map((s) => (
+                      <SelectItem key={s.id} value={s.id}>
+                        {s.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Date, Time, Duration */}
+            <div className="grid grid-cols-3 gap-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="date" className="text-sm text-[#374151]">Fecha</Label>
+                <Input
+                  id="date"
+                  type="date"
+                  value={newEvent.date}
+                  onChange={(e) => setNewEvent({ ...newEvent, date: e.target.value })}
+                  className="border-[#E5E7EB]"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="time" className="text-sm text-[#374151]">Hora</Label>
+                <Input
+                  id="time"
+                  type="time"
+                  value={newEvent.time}
+                  onChange={(e) => setNewEvent({ ...newEvent, time: e.target.value })}
+                  className="border-[#E5E7EB]"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-sm text-[#374151]">Duración</Label>
+                <Select
+                  value={newEvent.duration}
+                  onValueChange={(value) => setNewEvent({ ...newEvent, duration: value })}
+                >
+                  <SelectTrigger className="border-[#E5E7EB]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="15">15 min</SelectItem>
+                    <SelectItem value="30">30 min</SelectItem>
+                    <SelectItem value="45">45 min</SelectItem>
+                    <SelectItem value="60">1 hora</SelectItem>
+                    <SelectItem value="90">1.5 horas</SelectItem>
+                    <SelectItem value="120">2 horas</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Location */}
+            <div className="space-y-1.5">
+              <Label htmlFor="location" className="text-sm text-[#374151]">Ubicación</Label>
+              <Input
+                id="location"
+                placeholder="Ej: Sala de reuniones, Virtual - Zoom"
+                value={newEvent.location}
+                onChange={(e) => setNewEvent({ ...newEvent, location: e.target.value })}
+                className="border-[#E5E7EB]"
+              />
+            </div>
+
+            {/* Description */}
+            <div className="space-y-1.5">
+              <Label htmlFor="description" className="text-sm text-[#374151]">Notas (opcional)</Label>
+              <Textarea
+                id="description"
+                placeholder="Detalles adicionales del evento..."
+                value={newEvent.description}
+                onChange={(e) => setNewEvent({ ...newEvent, description: e.target.value })}
+                className="border-[#E5E7EB] resize-none h-20"
+              />
+            </div>
+
+            {/* Actions */}
+            <div className="flex justify-end gap-2 pt-2">
+              <Button
+                variant="outline"
+                onClick={() => setIsDialogOpen(false)}
+                className="border-[#E5E7EB] text-[#374151]"
+              >
+                Cancelar
+              </Button>
+              <Button
+                className="bg-[#1E3A5F] hover:bg-[#2D4A6F] text-white"
+                onClick={() => {
+                  // Here would save the event
+                  setIsDialogOpen(false)
+                  setNewEvent({
+                    title: "",
+                    type: "",
+                    date: "",
+                    time: "",
+                    duration: "30",
+                    location: "",
+                    student: "",
+                    description: "",
+                  })
+                }}
+              >
+                Crear evento
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
