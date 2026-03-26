@@ -194,6 +194,12 @@ export default function ExpedientePage() {
           </p>
         </div>
         <div className="flex gap-2">
+          <Link href={`/dashboard/estudiantes/${student.id}/perfil`}>
+            <Button variant="ghost" className="gap-2 text-[#6B7280] hover:text-[#1E3A5F]">
+              <User size={16} />
+              Ver perfil
+            </Button>
+          </Link>
           <Button variant="outline" className="gap-2 border-[#E5E7EB] text-[#374151]">
             <Calendar size={16} />
             Programar evento

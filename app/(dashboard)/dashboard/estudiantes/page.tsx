@@ -249,7 +249,7 @@ export default function EstudiantesPage() {
               </div>
 
               <div className="flex gap-2 mt-3">
-                <Link href={`/dashboard/estudiantes/${student.id}?tab=perfil`} className="flex-1">
+                <Link href={`/dashboard/estudiantes/${student.id}/perfil`} className="flex-1">
                   <Button
                     variant="ghost"
                     size="sm"
