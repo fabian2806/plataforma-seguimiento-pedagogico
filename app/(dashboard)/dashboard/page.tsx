@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
 import { useAuth, getRoleDisplayName, getRoleColor } from "@/lib/auth"
+import { AdminDashboard } from "@/components/admin/admin-dashboard"
 
 // Mock data - in production this would come from the database
 const stats = [
@@ -117,6 +118,12 @@ const recentActivity = [
 
 export default function DashboardPage() {
   const { user } = useAuth()
+  
+  // Admin tiene su propio dashboard
+  if (user?.role === "admin") {
+    return <AdminDashboard />
+  }
+
   const roleColor = getRoleColor(user?.role || "docente")
   const firstName = user?.name?.split(" ")[0] || "Usuario"
 
