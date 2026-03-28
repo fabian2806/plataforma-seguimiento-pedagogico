@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { Search, Plus, MoreHorizontal, Edit, Trash2, Eye, UserPlus, Filter } from "lucide-react"
+import { Search, Plus, MoreHorizontal, Edit, Trash2, Eye, Users, GraduationCap, Ear, UserCheck } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -250,6 +250,75 @@ export function AdminStudentsList() {
         </Button>
       </div>
 
+      {/* Stats Cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <Card className="border-[#E5E7EB]">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-lg bg-[#FEF3C7]">
+                <Users size={20} className="text-[#D97706]" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-[#1E3A5F]">{students.length}</p>
+                <p className="text-xs text-[#6B7280]">Total estudiantes</p>
+              </div>
+            </div>
+            <div className="mt-3 flex gap-3 text-xs">
+              <span className="flex items-center gap-1 text-[#059669]">
+                <span className="w-2 h-2 rounded-full bg-[#10B981]"></span>
+                {students.filter((s) => s.status === "active").length} activos
+              </span>
+              <span className="flex items-center gap-1 text-[#6B7280]">
+                <span className="w-2 h-2 rounded-full bg-[#9CA3AF]"></span>
+                {students.filter((s) => s.status === "inactive").length} inactivos
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-[#E5E7EB]">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-lg bg-[#EEF2FF]">
+                <GraduationCap size={20} className="text-[#3B82F6]" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-[#1E3A5F]">{new Set(students.map((s) => s.grade)).size}</p>
+                <p className="text-xs text-[#6B7280]">Grados con estudiantes</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-[#E5E7EB]">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-lg bg-[#F3E8FF]">
+                <Ear size={20} className="text-[#8B5CF6]" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-[#1E3A5F]">{students.filter((s) => s.hearingLevel.includes("severa") || s.hearingLevel.includes("profunda")).length}</p>
+                <p className="text-xs text-[#6B7280]">Hipoacusia severa/profunda</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-[#E5E7EB]">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-lg bg-[#ECFDF5]">
+                <UserCheck size={20} className="text-[#059669]" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-[#1E3A5F]">{new Set(students.map((s) => s.docenteId)).size}</p>
+                <p className="text-xs text-[#6B7280]">Docentes asignados</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
       {/* Filters */}
       <Card className="border-[#E5E7EB]">
         <CardContent className="p-4">
@@ -383,15 +452,6 @@ export function AdminStudentsList() {
           </Table>
         </CardContent>
       </Card>
-
-      {/* Summary */}
-      <div className="flex gap-4 text-xs text-[#6B7280]">
-        <span>Total: {filteredStudents.length} estudiantes</span>
-        <span>|</span>
-        <span>Activos: {filteredStudents.filter((s) => s.status === "active").length}</span>
-        <span>|</span>
-        <span>Inactivos: {filteredStudents.filter((s) => s.status === "inactive").length}</span>
-      </div>
 
       {/* Create/Edit Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
