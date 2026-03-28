@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Search, Plus, MoreHorizontal, Edit, Trash2, UserCheck, UserX, Filter } from "lucide-react"
+import { Search, Plus, MoreHorizontal, Edit, Trash2, UserCheck, UserX, Users, GraduationCap, UserCog, Shield } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -216,6 +216,75 @@ export default function UsuariosPage() {
         </Button>
       </div>
 
+      {/* Stats Cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <Card className="border-[#E5E7EB]">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-lg bg-[#EEF2FF]">
+                <Users size={20} className="text-[#3B82F6]" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-[#1E3A5F]">{users.length}</p>
+                <p className="text-xs text-[#6B7280]">Total usuarios</p>
+              </div>
+            </div>
+            <div className="mt-3 flex gap-3 text-xs">
+              <span className="flex items-center gap-1 text-[#059669]">
+                <span className="w-2 h-2 rounded-full bg-[#10B981]"></span>
+                {users.filter((u) => u.status === "active").length} activos
+              </span>
+              <span className="flex items-center gap-1 text-[#6B7280]">
+                <span className="w-2 h-2 rounded-full bg-[#9CA3AF]"></span>
+                {users.filter((u) => u.status === "inactive").length} inactivos
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-[#E5E7EB]">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-lg bg-[#EEF2FF]">
+                <GraduationCap size={20} className="text-[#3B82F6]" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-[#1E3A5F]">{users.filter((u) => u.role === "docente").length}</p>
+                <p className="text-xs text-[#6B7280]">Docentes</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-[#E5E7EB]">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-lg bg-[#F3E8FF]">
+                <UserCog size={20} className="text-[#8B5CF6]" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-[#1E3A5F]">{users.filter((u) => u.role === "padre").length}</p>
+                <p className="text-xs text-[#6B7280]">Padres/Tutores</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-[#E5E7EB]">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-lg bg-[#ECFDF5]">
+                <Shield size={20} className="text-[#059669]" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-[#1E3A5F]">{users.filter((u) => u.role === "saanee").length}</p>
+                <p className="text-xs text-[#6B7280]">SAANEE</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
       {/* Filters */}
       <Card className="border-[#E5E7EB]">
         <CardContent className="p-4">
@@ -350,15 +419,6 @@ export default function UsuariosPage() {
           </Table>
         </CardContent>
       </Card>
-
-      {/* Summary */}
-      <div className="flex gap-4 text-xs text-[#6B7280]">
-        <span>Total: {filteredUsers.length} usuarios</span>
-        <span>|</span>
-        <span>Activos: {filteredUsers.filter((u) => u.status === "active").length}</span>
-        <span>|</span>
-        <span>Inactivos: {filteredUsers.filter((u) => u.status === "inactive").length}</span>
-      </div>
 
       {/* Create/Edit Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
