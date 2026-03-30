@@ -14,6 +14,7 @@ import {
   MessageSquare,
   BarChart3,
   UserCog,
+  Target,
 } from "lucide-react"
 import {
   Sidebar,
@@ -43,6 +44,7 @@ const menuConfig: Record<UserRole, { title: string; url: string; icon: typeof La
   docente: [
     { title: "Inicio", url: "/dashboard", icon: LayoutDashboard },
     { title: "Estudiantes", url: "/dashboard/estudiantes", icon: Users },
+    { title: "Indicadores", url: "/dashboard/indicadores", icon: Target },
     { title: "Eventos", url: "/dashboard/eventos", icon: Calendar },
     { title: "Informes", url: "/dashboard/informes", icon: FileText },
   ],

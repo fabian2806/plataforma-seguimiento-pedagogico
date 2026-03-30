@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Calendar, Plus, Clock, MapPin, ChevronLeft, ChevronRight, Video, User, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -133,6 +133,12 @@ export default function EventosPage() {
     description: "",
   })
 
+  // Track if component is mounted (for hydration)
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
   // Get current week dates
   const today = new Date()
   const startOfWeek = new Date(today)
@@ -149,6 +155,7 @@ export default function EventosPage() {
   }
 
   const isToday = (date: Date) => {
+    if (!mounted) return false // Prevent hydration mismatch
     const today = new Date()
     return date.toDateString() === today.toDateString()
   }
