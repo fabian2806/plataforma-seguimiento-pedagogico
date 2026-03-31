@@ -11,8 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 
-// Mock events data
-const events = [
+// Initial mock events data
+const initialEvents = [
   {
     id: "1",
     title: "Reunión con familia Rodríguez",
@@ -122,6 +122,7 @@ const students = [
 export default function EventosPage() {
   const [currentWeek, setCurrentWeek] = useState(0)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [events, setEvents] = useState(initialEvents)
   const [newEvent, setNewEvent] = useState({
     title: "",
     type: "",
@@ -132,6 +133,62 @@ export default function EventosPage() {
     student: "",
     description: "",
   })
+
+  // Helper to format duration
+  const formatDuration = (minutes: string) => {
+    const min = parseInt(minutes)
+    if (min < 60) return `${min} min`
+    if (min === 60) return "1 hr"
+    if (min === 90) return "1.5 hrs"
+    return `${min / 60} hrs`
+  }
+
+  // Helper to format time from 24h to 12h
+  const formatTime = (time: string) => {
+    if (!time) return ""
+    const [hours, minutes] = time.split(":")
+    const h = parseInt(hours)
+    const ampm = h >= 12 ? "PM" : "AM"
+    const hour12 = h % 12 || 12
+    return `${hour12}:${minutes} ${ampm}`
+  }
+
+  // Handle create event
+  const handleCreateEvent = () => {
+    if (!newEvent.title || !newEvent.type || !newEvent.date || !newEvent.time) {
+      return // Basic validation
+    }
+
+    const studentName = newEvent.student 
+      ? students.find(s => s.id === newEvent.student)?.name || null
+      : null
+
+    const event = {
+      id: Date.now().toString(),
+      title: newEvent.title,
+      date: newEvent.date,
+      time: formatTime(newEvent.time),
+      duration: formatDuration(newEvent.duration),
+      type: newEvent.type,
+      location: newEvent.location || "Por definir",
+      student: studentName,
+      attendees: [],
+      status: "pendiente",
+    }
+
+    setEvents([event, ...events])
+    setIsDialogOpen(false)
+    setNewEvent({
+      title: "",
+      type: "",
+      date: "",
+      time: "",
+      duration: "30",
+      location: "",
+      student: "",
+      description: "",
+    })
+  }
 
   // Track if component is mounted (for hydration)
   const [mounted, setMounted] = useState(false)
@@ -498,20 +555,8 @@ export default function EventosPage() {
               </Button>
               <Button
                 className="bg-[#1E3A5F] hover:bg-[#2D4A6F] text-white"
-                onClick={() => {
-                  // Here would save the event
-                  setIsDialogOpen(false)
-                  setNewEvent({
-                    title: "",
-                    type: "",
-                    date: "",
-                    time: "",
-                    duration: "30",
-                    location: "",
-                    student: "",
-                    description: "",
-                  })
-                }}
+                disabled={!newEvent.title || !newEvent.type || !newEvent.date || !newEvent.time}
+                onClick={handleCreateEvent}
               >
                 Crear evento
               </Button>
