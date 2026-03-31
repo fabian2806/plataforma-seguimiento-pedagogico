@@ -217,6 +217,24 @@ export default function EventosPage() {
     return date.toDateString() === today.toDateString()
   }
 
+  // Helper to convert time string to minutes for sorting
+  const timeToMinutes = (time: string) => {
+    if (!time) return 0
+    const match = time.match(/(\d+):(\d+)\s*(AM|PM)?/i)
+    if (!match) return 0
+    let hours = parseInt(match[1])
+    const minutes = parseInt(match[2])
+    const period = match[3]?.toUpperCase()
+    if (period === "PM" && hours !== 12) hours += 12
+    if (period === "AM" && hours === 12) hours = 0
+    return hours * 60 + minutes
+  }
+
+  // Sort events by time
+  const sortEventsByTime = (eventsList: typeof events) => {
+    return [...eventsList].sort((a, b) => timeToMinutes(a.time) - timeToMinutes(b.time))
+  }
+
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
@@ -291,8 +309,8 @@ export default function EventosPage() {
           {/* Events grid */}
           <div className="grid grid-cols-5 gap-2 min-h-[200px]">
             {weekDays.map((day, idx) => {
-              const dayEvents = events.filter(
-                (e) => e.date === day.toISOString().split("T")[0]
+              const dayEvents = sortEventsByTime(
+                events.filter((e) => e.date === day.toISOString().split("T")[0])
               )
               return (
                 <div key={idx} className="space-y-2">
@@ -335,7 +353,7 @@ export default function EventosPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            {events.map((event) => {
+            {sortEventsByTime(events).map((event) => {
               const typeStyle = getEventTypeStyle(event.type)
               const statusStyle = getStatusStyle(event.status)
               return (
