@@ -21,6 +21,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { useAuth } from "@/lib/auth"
+import { AdminStudentsList } from "@/components/admin/admin-students-list"
 
 // Mock data
 const students = [
@@ -99,9 +101,15 @@ const students = [
 ]
 
 export default function EstudiantesPage() {
+  const { user } = useAuth()
   const [search, setSearch] = useState("")
   const [filterGrade, setFilterGrade] = useState("all")
   const [filterStatus, setFilterStatus] = useState("all")
+
+  // Admin ve la lista CRUD
+  if (user?.role === "admin") {
+    return <AdminStudentsList />
+  }
 
   const filteredStudents = students.filter((student) => {
     const matchesSearch = student.name.toLowerCase().includes(search.toLowerCase())

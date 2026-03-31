@@ -10,6 +10,11 @@ import {
   Settings,
   LogOut,
   GraduationCap,
+  Shield,
+  MessageSquare,
+  BarChart3,
+  UserCog,
+  Target,
 } from "lucide-react"
 import {
   Sidebar,
@@ -25,41 +30,59 @@ import {
   SidebarSeparator,
 } from "@/components/ui/sidebar"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { useAuth, getRoleDisplayName, getRoleColor, UserRole } from "@/lib/auth"
 
-// Menu items for docente role - can be extended for other roles
-const menuItems = [
-  {
-    title: "Inicio",
-    url: "/dashboard",
-    icon: LayoutDashboard,
-  },
-  {
-    title: "Estudiantes",
-    url: "/dashboard/estudiantes",
-    icon: Users,
-  },
-  {
-    title: "Eventos",
-    url: "/dashboard/eventos",
-    icon: Calendar,
-  },
-  {
-    title: "Informes",
-    url: "/dashboard/informes",
-    icon: FileText,
-  },
-]
+// Menu configuration per role
+const menuConfig: Record<UserRole, { title: string; url: string; icon: typeof LayoutDashboard }[]> = {
+  admin: [
+    { title: "Inicio", url: "/dashboard", icon: LayoutDashboard },
+    { title: "Usuarios", url: "/dashboard/usuarios", icon: UserCog },
+    { title: "Estudiantes", url: "/dashboard/estudiantes", icon: Users },
+    { title: "Eventos", url: "/dashboard/eventos", icon: Calendar },
+    { title: "Reportes", url: "/dashboard/reportes", icon: BarChart3 },
+  ],
+  docente: [
+    { title: "Inicio", url: "/dashboard", icon: LayoutDashboard },
+    { title: "Estudiantes", url: "/dashboard/estudiantes", icon: Users },
+    { title: "Indicadores", url: "/dashboard/indicadores", icon: Target },
+    { title: "Eventos", url: "/dashboard/eventos", icon: Calendar },
+    { title: "Informes", url: "/dashboard/informes", icon: FileText },
+  ],
+  padre: [
+    { title: "Inicio", url: "/dashboard", icon: LayoutDashboard },
+    { title: "Mi Hijo/a", url: "/dashboard/estudiantes/1", icon: Users },
+    { title: "Comunicación", url: "/dashboard/comunicacion", icon: MessageSquare },
+    { title: "Eventos", url: "/dashboard/eventos", icon: Calendar },
+  ],
+  saanee: [
+    { title: "Inicio", url: "/dashboard", icon: LayoutDashboard },
+    { title: "Estudiantes", url: "/dashboard/estudiantes", icon: Users },
+    { title: "Evaluaciones", url: "/dashboard/evaluaciones", icon: FileText },
+    { title: "Eventos", url: "/dashboard/eventos", icon: Calendar },
+    { title: "Coordinación", url: "/dashboard/coordinacion", icon: Shield },
+  ],
+}
 
 const secondaryItems = [
-  {
-    title: "Configuración",
-    url: "/dashboard/configuracion",
-    icon: Settings,
-  },
+  { title: "Configuración", url: "/dashboard/configuracion", icon: Settings },
 ]
+
+// Panel label per role
+const panelLabels: Record<UserRole, string> = {
+  admin: "Panel Admin",
+  docente: "Panel Docente",
+  padre: "Panel Familiar",
+  saanee: "Panel SAANEE",
+}
 
 export function AppSidebar() {
   const pathname = usePathname()
+  const { user, logout } = useAuth()
+
+  // Default to docente menu if no user (fallback)
+  const role = user?.role || "docente"
+  const menuItems = menuConfig[role]
+  const roleColor = getRoleColor(role)
 
   return (
     <Sidebar className="border-r border-[#E5E7EB]">
@@ -70,7 +93,7 @@ export function AppSidebar() {
           </div>
           <div className="flex flex-col">
             <span className="text-sm font-bold text-[#1E3A5F]">SignaEdu</span>
-            <span className="text-[10px] text-[#6B7280]">Panel Docente</span>
+            <span className="text-[10px] text-[#6B7280]">{panelLabels[role]}</span>
           </div>
         </Link>
       </SidebarHeader>
@@ -88,7 +111,7 @@ export function AppSidebar() {
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
                     asChild
-                    isActive={pathname === item.url}
+                    isActive={pathname === item.url || pathname.startsWith(item.url + "/")}
                     className="data-[active=true]:bg-[#EEF2FF] data-[active=true]:text-[#3B82F6] hover:bg-[#F3F4F6]"
                   >
                     <Link href={item.url}>
@@ -131,17 +154,21 @@ export function AppSidebar() {
         <SidebarSeparator className="mb-4" />
         <div className="flex items-center gap-3">
           <Avatar className="h-9 w-9">
-            <AvatarFallback className="bg-[#3B82F6] text-white text-xs font-semibold">
-              MC
+            <AvatarFallback className={`${roleColor.bg} ${roleColor.text} text-xs font-semibold`}>
+              {user?.name?.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase() || "US"}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-[#1E3A5F] truncate">María Castro</p>
-            <p className="text-xs text-[#6B7280] truncate">Docente</p>
+            <p className="text-sm font-medium text-[#1E3A5F] truncate">{user?.name || "Usuario"}</p>
+            <p className="text-xs text-[#6B7280] truncate">{getRoleDisplayName(role)}</p>
           </div>
-          <Link href="/login" className="text-[#9CA3AF] hover:text-[#6B7280] transition-colors">
+          <button
+            onClick={logout}
+            className="text-[#9CA3AF] hover:text-[#6B7280] transition-colors"
+            title="Cerrar sesión"
+          >
             <LogOut size={18} />
-          </Link>
+          </button>
         </div>
       </SidebarFooter>
     </Sidebar>
