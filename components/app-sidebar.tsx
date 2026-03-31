@@ -15,6 +15,7 @@ import {
   BarChart3,
   UserCog,
   Target,
+  FolderCog,
 } from "lucide-react"
 import {
   Sidebar,
@@ -38,6 +39,7 @@ const menuConfig: Record<UserRole, { title: string; url: string; icon: typeof La
     { title: "Inicio", url: "/dashboard", icon: LayoutDashboard },
     { title: "Usuarios", url: "/dashboard/usuarios", icon: UserCog },
     { title: "Estudiantes", url: "/dashboard/estudiantes", icon: Users },
+    { title: "Tipos Documento", url: "/dashboard/tipos-documento", icon: FolderCog },
     { title: "Eventos", url: "/dashboard/eventos", icon: Calendar },
     { title: "Reportes", url: "/dashboard/reportes", icon: BarChart3 },
   ],
