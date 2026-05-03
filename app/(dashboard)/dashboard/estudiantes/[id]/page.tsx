@@ -23,6 +23,8 @@ import {
   CheckCircle,
   AlertCircle,
   FileCheck,
+  ChevronDown,
+  X,
 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -31,6 +33,8 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
 import { Separator } from "@/components/ui/separator"
+import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 // Mock student data
 const student = {
@@ -370,10 +374,94 @@ function getRoleColor(role: string) {
   }
 }
 
+// Tipo entrada config
+const ENTRY_TYPES = [
+  { id: "observacion_pe",       label: "Obs. Pedagógica",    short: "OBS",  hasImportancia: true,  hasSeveridad: true,  hasIndicador: false, hasEvento: false, hasResultado: false },
+  { id: "comunicacion_familiar",label: "Comunicación Fam.",  short: "COM",  hasImportancia: true,  hasSeveridad: true,  hasIndicador: false, hasEvento: false, hasResultado: false },
+  { id: "incidencia",           label: "Incidencia",         short: "INC",  hasImportancia: false, hasSeveridad: true,  hasIndicador: false, hasEvento: false, hasResultado: true  },
+  { id: "apoyo_ajuste",         label: "Apoyo o Ajuste",     short: "APO",  hasImportancia: false, hasSeveridad: false, hasIndicador: false, hasEvento: false, hasResultado: false },
+  { id: "evaluacion_indicador", label: "Eval. Indicador",    short: "EVA",  hasImportancia: false, hasSeveridad: false, hasIndicador: true,  hasEvento: false, hasResultado: true  },
+  { id: "evento_agenda",        label: "Evento Agenda",      short: "EVT",  hasImportancia: false, hasSeveridad: false, hasIndicador: false, hasEvento: true,  hasResultado: false },
+  { id: "documento",            label: "Documento",          short: "DOC",  hasImportancia: false, hasSeveridad: false, hasIndicador: false, hasEvento: false, hasResultado: false },
+  { id: "feedback_saanee",      label: "Feedback SAANEE",    short: "SAA",  hasImportancia: true,  hasSeveridad: true,  hasIndicador: false, hasEvento: false, hasResultado: false },
+]
+
+const MOCK_INDICADORES = [
+  { id: "COM-01", label: "COM-01: Comprensión de instrucciones en LSP" },
+  { id: "COM-02", label: "COM-02: Vocabulario en LSP" },
+  { id: "COM-03", label: "COM-03: Expresión de necesidades básicas" },
+  { id: "MAT-01", label: "MAT-01: Operaciones básicas" },
+]
+
+const MOCK_EVENTOS = [
+  { id: "ev-1", label: "Evaluación trimestral · 28 Mar 2025" },
+  { id: "ev-2", label: "Sesión SAANEE · 1 Abr 2025" },
+]
+
 export default function ExpedientePage() {
-  const [newEntry, setNewEntry] = useState("")
   const [activeMainTab, setActiveMainTab] = useState<"bitacora" | "documentos">("bitacora")
   const [showVersionHistory, setShowVersionHistory] = useState<string | null>(null)
+  const [activeFilter, setActiveFilter] = useState("all")
+  const [replyingTo, setReplyingTo] = useState<string | null>(null)
+  const [replyText, setReplyText] = useState("")
+  const [entries, setEntries] = useState(bitacoraEntries)
+
+  // New entry form state
+  const [entryForm, setEntryForm] = useState({
+    tipo: "",
+    titulo: "",
+    contenido: "",
+    importancia: "",
+    severidad: "",
+    indicadorId: "",
+    eventoId: "",
+    resultado: "",
+  })
+
+  const selectedType = ENTRY_TYPES.find(t => t.id === entryForm.tipo)
+
+  const handlePublish = () => {
+    if (!entryForm.tipo || !entryForm.contenido.trim()) return
+    const typeConfig = ENTRY_TYPES.find(t => t.id === entryForm.tipo)!
+    const newE = {
+      id: Date.now().toString(),
+      date: new Date().toLocaleDateString("es-PE", { day: "2-digit", month: "short", year: "numeric" }),
+      time: new Date().toLocaleTimeString("es-PE", { hour: "2-digit", minute: "2-digit" }),
+      author: "Prof. María Castro",
+      role: "Docente",
+      type: entryForm.tipo,
+      title: entryForm.titulo || typeConfig.label,
+      content: entryForm.contenido,
+      attachments: [],
+      replies: [],
+      importancia: entryForm.importancia || undefined,
+      severidad: entryForm.severidad || undefined,
+      resultado: entryForm.resultado || undefined,
+    }
+    setEntries([newE, ...entries])
+    setEntryForm({ tipo: "", titulo: "", contenido: "", importancia: "", severidad: "", indicadorId: "", eventoId: "", resultado: "" })
+  }
+
+  const handleReply = (entryId: string) => {
+    if (!replyText.trim()) return
+    setEntries(prev => prev.map(e => e.id === entryId
+      ? { ...e, replies: [...(e.replies || []), {
+          author: "Prof. María Castro",
+          role: "Docente",
+          date: new Date().toLocaleDateString("es-PE", { day: "2-digit", month: "short", year: "numeric" }),
+          time: new Date().toLocaleTimeString("es-PE", { hour: "2-digit", minute: "2-digit" }),
+          content: replyText,
+          attachments: [],
+        }]}
+      : e
+    ))
+    setReplyText("")
+    setReplyingTo(null)
+  }
+
+  const filteredEntries = activeFilter === "all"
+    ? entries
+    : entries.filter(e => e.type === activeFilter)
 
   return (
     <div className="p-6 space-y-6">
@@ -589,32 +677,157 @@ export default function ExpedientePage() {
                   <FileText size={20} className="text-[#3B82F6]" />
                   Bitácora del expediente
                 </CardTitle>
-                <Tabs defaultValue="all" className="w-auto">
-                  <TabsList className="bg-[#F3F4F6] h-8">
-                    <TabsTrigger value="all" className="text-xs h-6 px-3">Todas</TabsTrigger>
-                    <TabsTrigger value="observacion_pe" className="text-xs h-6 px-3">Observaciones</TabsTrigger>
-                    <TabsTrigger value="evaluacion_indicador" className="text-xs h-6 px-3">Evaluaciones</TabsTrigger>
-                    <TabsTrigger value="feedback_saanee" className="text-xs h-6 px-3">SAANEE</TabsTrigger>
-                  </TabsList>
-                </Tabs>
+                {/* Filter tabs */}
+                <div className="flex items-center gap-1 bg-[#F3F4F6] rounded-lg p-1">
+                  {[
+                    { id: "all", label: "Todas" },
+                    { id: "observacion_pe", label: "Observaciones" },
+                    { id: "evaluacion_indicador", label: "Evaluaciones" },
+                    { id: "feedback_saanee", label: "SAANEE" },
+                    { id: "comunicacion_familiar", label: "Familia" },
+                  ].map(f => (
+                    <button
+                      key={f.id}
+                      onClick={() => setActiveFilter(f.id)}
+                      className={`text-xs px-3 h-6 rounded-md transition-colors ${
+                        activeFilter === f.id
+                          ? "bg-white text-[#1E3A5F] font-medium shadow-sm"
+                          : "text-[#6B7280] hover:text-[#374151]"
+                      }`}
+                    >
+                      {f.label}
+                    </button>
+                  ))}
+                </div>
               </div>
             </CardHeader>
             <CardContent>
               {/* New Entry Form */}
-              <div className="mb-6 p-4 rounded-lg bg-[#F9FAFB] border border-[#E5E7EB]">
-                <Textarea
-                  placeholder="Escribe una nueva entrada en la bitácora..."
-                  value={newEntry}
-                  onChange={(e) => setNewEntry(e.target.value)}
-                  className="mb-3 bg-white border-[#E5E7EB] min-h-[80px] resize-none"
-                />
-                <div className="flex items-center justify-between">
-                  <Button variant="ghost" size="sm" className="text-[#6B7280] gap-2">
-                    <Upload size={14} />
+              <div className="mb-6 rounded-lg bg-[#F9FAFB] border border-[#E5E7EB] overflow-hidden">
+                {/* Type selector */}
+                <div className="px-4 pt-4 pb-3 border-b border-[#E5E7EB]">
+                  <p className="text-xs font-medium text-[#6B7280] uppercase tracking-wide mb-2">Tipo de entrada</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {ENTRY_TYPES.map(t => (
+                      <button
+                        key={t.id}
+                        onClick={() => setEntryForm(f => ({ ...f, tipo: f.tipo === t.id ? "" : t.id }))}
+                        className={`text-xs px-3 py-1 rounded-full border transition-colors ${
+                          entryForm.tipo === t.id
+                            ? "bg-[#1E3A5F] text-white border-[#1E3A5F]"
+                            : "bg-white text-[#374151] border-[#E5E7EB] hover:border-[#1E3A5F] hover:text-[#1E3A5F]"
+                        }`}
+                      >
+                        {t.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Textarea */}
+                <div className="px-4 pt-3">
+                  {entryForm.tipo && (
+                    <Input
+                      placeholder="Título (opcional)"
+                      value={entryForm.titulo}
+                      onChange={e => setEntryForm(f => ({ ...f, titulo: e.target.value }))}
+                      className="mb-2 bg-white border-[#E5E7EB] text-sm h-8"
+                    />
+                  )}
+                  <Textarea
+                    placeholder={
+                      entryForm.tipo === "observacion_pe" ? "Describe la observación pedagógica..." :
+                      entryForm.tipo === "comunicacion_familiar" ? "Describe la comunicación con la familia..." :
+                      entryForm.tipo === "incidencia" ? "Describe la incidencia ocurrida..." :
+                      entryForm.tipo === "apoyo_ajuste" ? "Describe el apoyo o ajuste implementado..." :
+                      entryForm.tipo === "evaluacion_indicador" ? "Describe los resultados de la evaluación..." :
+                      entryForm.tipo === "evento_agenda" ? "Describe el evento o actividad..." :
+                      entryForm.tipo === "documento" ? "Describe el documento adjuntado..." :
+                      entryForm.tipo === "feedback_saanee" ? "Escribe la retroalimentación del equipo SAANEE..." :
+                      "Selecciona un tipo de entrada para comenzar..."
+                    }
+                    value={entryForm.contenido}
+                    onChange={e => setEntryForm(f => ({ ...f, contenido: e.target.value }))}
+                    className="bg-white border-[#E5E7EB] min-h-[90px] resize-none text-sm"
+                    disabled={!entryForm.tipo}
+                  />
+                </div>
+
+                {/* Conditional fields */}
+                {selectedType && (selectedType.hasImportancia || selectedType.hasSeveridad || selectedType.hasIndicador || selectedType.hasEvento || selectedType.hasResultado) && (
+                  <div className="px-4 pt-2 pb-3 flex flex-wrap gap-2">
+                    {selectedType.hasImportancia && (
+                      <Select value={entryForm.importancia} onValueChange={v => setEntryForm(f => ({ ...f, importancia: v }))}>
+                        <SelectTrigger className="h-8 text-xs w-40 bg-white border-[#E5E7EB]">
+                          <SelectValue placeholder="Importancia" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="bajo">Baja</SelectItem>
+                          <SelectItem value="medio">Media</SelectItem>
+                          <SelectItem value="alto">Alta</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    )}
+                    {selectedType.hasSeveridad && (
+                      <Select value={entryForm.severidad} onValueChange={v => setEntryForm(f => ({ ...f, severidad: v }))}>
+                        <SelectTrigger className="h-8 text-xs w-40 bg-white border-[#E5E7EB]">
+                          <SelectValue placeholder="Severidad" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="leve">Leve</SelectItem>
+                          <SelectItem value="moderada">Moderada</SelectItem>
+                          <SelectItem value="grave">Grave</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    )}
+                    {selectedType.hasIndicador && (
+                      <Select value={entryForm.indicadorId} onValueChange={v => setEntryForm(f => ({ ...f, indicadorId: v }))}>
+                        <SelectTrigger className="h-8 text-xs w-64 bg-white border-[#E5E7EB]">
+                          <SelectValue placeholder="Seleccionar indicador" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {MOCK_INDICADORES.map(i => (
+                            <SelectItem key={i.id} value={i.id}>{i.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                    {selectedType.hasEvento && (
+                      <Select value={entryForm.eventoId} onValueChange={v => setEntryForm(f => ({ ...f, eventoId: v }))}>
+                        <SelectTrigger className="h-8 text-xs w-60 bg-white border-[#E5E7EB]">
+                          <SelectValue placeholder="Vincular a evento" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {MOCK_EVENTOS.map(e => (
+                            <SelectItem key={e.id} value={e.id}>{e.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                    {selectedType.hasResultado && (
+                      <Input
+                        placeholder="Resultado (ej: Logrado 85%)"
+                        value={entryForm.resultado}
+                        onChange={e => setEntryForm(f => ({ ...f, resultado: e.target.value }))}
+                        className="h-8 text-xs w-52 bg-white border-[#E5E7EB]"
+                      />
+                    )}
+                  </div>
+                )}
+
+                {/* Footer */}
+                <div className="px-4 pb-4 flex items-center justify-between">
+                  <Button variant="ghost" size="sm" className="text-[#6B7280] gap-1.5 text-xs">
+                    <Paperclip size={13} />
                     Adjuntar archivo
                   </Button>
-                  <Button size="sm" className="bg-[#3B82F6] hover:bg-[#2563EB] text-white gap-2">
-                    <MessageSquare size={14} />
+                  <Button
+                    size="sm"
+                    className="bg-[#1E3A5F] hover:bg-[#2D4A6F] text-white gap-1.5 text-xs"
+                    disabled={!entryForm.tipo || !entryForm.contenido.trim()}
+                    onClick={handlePublish}
+                  >
+                    <MessageSquare size={13} />
                     Publicar entrada
                   </Button>
                 </div>
@@ -622,46 +835,54 @@ export default function ExpedientePage() {
 
               {/* Entries Timeline */}
               <div className="space-y-4">
-                {bitacoraEntries.map((entry, index) => {
+                {filteredEntries.map((entry, index) => {
                   const typeStyle = getEntryTypeColor(entry.type)
                   const roleColor = getRoleColor(entry.role)
+                  const isReplying = replyingTo === entry.id
 
                   return (
                     <div key={entry.id} className="relative">
-                      {/* Timeline connector */}
-                      {index < bitacoraEntries.length - 1 && (
+                      {index < filteredEntries.length - 1 && (
                         <div className="absolute left-4 top-12 bottom-0 w-px bg-[#E5E7EB]" />
                       )}
 
                       <div className="flex gap-4">
                         {/* Avatar */}
-                        <div
-                          className={`w-8 h-8 rounded-full ${roleColor} flex items-center justify-center flex-shrink-0 z-10`}
-                        >
+                        <div className={`w-8 h-8 rounded-full ${roleColor} flex items-center justify-center flex-shrink-0 z-10`}>
                           <span className="text-xs text-white font-semibold">
-                            {entry.author
-                              .split(" ")
-                              .map((n) => n[0])
-                              .join("")
-                              .slice(0, 2)}
+                            {entry.author.split(" ").map((n: string) => n[0]).join("").slice(0, 2)}
                           </span>
                         </div>
 
                         {/* Content */}
                         <div className="flex-1 pb-4">
-                          <div className={`p-4 rounded-lg border-l-4 border ${typeStyle.border} ${typeStyle.bg} bg-opacity-30`}>
+                          <div className={`p-4 rounded-lg border-l-4 border ${typeStyle.border} ${typeStyle.bg}`}>
                             <div className="flex items-start justify-between mb-2">
                               <div>
-                                <div className="flex items-center gap-2 mb-1">
-                                  <p className="text-sm font-semibold text-[#1E3A5F]">
-                                    {entry.title}
-                                  </p>
-                                  <Badge
-                                    variant="outline"
-                                    className={`text-[10px] ${typeStyle.bg} ${typeStyle.text} border-transparent`}
-                                  >
+                                <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                  <p className="text-sm font-semibold text-[#1E3A5F]">{entry.title}</p>
+                                  <Badge variant="outline" className={`text-[10px] ${typeStyle.bg} ${typeStyle.text} border-transparent`}>
                                     {typeStyle.label}
                                   </Badge>
+                                  {(entry as any).importancia && (
+                                    <Badge variant="outline" className="text-[10px] border-[#D1D5DB] text-[#6B7280]">
+                                      {(entry as any).importancia}
+                                    </Badge>
+                                  )}
+                                  {(entry as any).severidad && (
+                                    <Badge variant="outline" className={`text-[10px] border-transparent ${
+                                      (entry as any).severidad === "grave" ? "bg-[#FEE2E2] text-[#DC2626]" :
+                                      (entry as any).severidad === "moderada" ? "bg-[#FEF3C7] text-[#D97706]" :
+                                      "bg-[#F3F4F6] text-[#6B7280]"
+                                    }`}>
+                                      {(entry as any).severidad}
+                                    </Badge>
+                                  )}
+                                  {(entry as any).resultado && (
+                                    <Badge variant="outline" className="text-[10px] bg-[#ECFDF5] text-[#059669] border-transparent">
+                                      {(entry as any).resultado}
+                                    </Badge>
+                                  )}
                                 </div>
                                 <div className="flex items-center gap-2 text-xs text-[#6B7280]">
                                   <span className="font-medium">{entry.author}</span>
@@ -676,18 +897,13 @@ export default function ExpedientePage() {
                               </div>
                             </div>
 
-                            <p className="text-sm text-[#374151] leading-relaxed mb-3">
-                              {entry.content}
-                            </p>
+                            <p className="text-sm text-[#374151] leading-relaxed mb-3">{entry.content}</p>
 
                             {/* Attachments */}
                             {entry.attachments.length > 0 && (
                               <div className="flex flex-wrap gap-2 mb-3">
-                                {entry.attachments.map((file, idx) => (
-                                  <div
-                                    key={idx}
-                                    className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-[#F3F4F6] text-xs text-[#374151]"
-                                  >
+                                {entry.attachments.map((file: any, idx: number) => (
+                                  <div key={idx} className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-[#F3F4F6] text-xs text-[#374151]">
                                     <Paperclip size={12} className="text-[#6B7280]" />
                                     <span>{file.name}</span>
                                     <span className="text-[#9CA3AF]">({file.size})</span>
@@ -699,54 +915,93 @@ export default function ExpedientePage() {
                             {/* Replies */}
                             {entry.replies && entry.replies.length > 0 && (
                               <div className="mt-3 pt-3 border-t border-[#E5E7EB] space-y-3">
-                                {entry.replies.map((reply, replyIdx) => (
-                                  <div key={replyIdx} className="pl-4 border-l-2 border-[#3B82F6]">
-                                    <div className="flex items-center gap-2 text-xs text-[#6B7280] mb-1">
-                                      <span className="font-medium text-[#374151]">
-                                        {reply.author}
-                                      </span>
-                                      <span>·</span>
-                                      <span>{reply.role}</span>
-                                      <span>·</span>
-                                      <span>
-                                        {reply.date}, {reply.time}
+                                {entry.replies.map((reply: any, replyIdx: number) => (
+                                  <div key={replyIdx} className="flex gap-3">
+                                    <div className={`w-6 h-6 rounded-full ${getRoleColor(reply.role)} flex items-center justify-center flex-shrink-0`}>
+                                      <span className="text-[10px] text-white font-semibold">
+                                        {reply.author.split(" ").map((n: string) => n[0]).join("").slice(0, 2)}
                                       </span>
                                     </div>
-                                    <p className="text-sm text-[#374151]">{reply.content}</p>
-                                    {reply.attachments && reply.attachments.length > 0 && (
-                                      <div className="flex flex-wrap gap-2 mt-2">
-                                        {reply.attachments.map((file, fIdx) => (
-                                          <div
-                                            key={fIdx}
-                                            className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-[#F3F4F6] text-xs text-[#374151]"
-                                          >
-                                            <Paperclip size={12} className="text-[#6B7280]" />
-                                            <span>{file.name}</span>
-                                            <span className="text-[#9CA3AF]">({file.size})</span>
-                                          </div>
-                                        ))}
+                                    <div className="flex-1 pl-3 border-l-2 border-[#BFDBFE]">
+                                      <div className="flex items-center gap-2 text-xs text-[#6B7280] mb-1">
+                                        <span className="font-medium text-[#374151]">{reply.author}</span>
+                                        <span>·</span>
+                                        <span>{reply.role}</span>
+                                        <span>·</span>
+                                        <span>{reply.date}, {reply.time}</span>
                                       </div>
-                                    )}
+                                      <p className="text-sm text-[#374151]">{reply.content}</p>
+                                      {reply.attachments && reply.attachments.length > 0 && (
+                                        <div className="flex flex-wrap gap-2 mt-2">
+                                          {reply.attachments.map((file: any, fIdx: number) => (
+                                            <div key={fIdx} className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-[#F3F4F6] text-xs text-[#374151]">
+                                              <Paperclip size={12} className="text-[#6B7280]" />
+                                              <span>{file.name}</span>
+                                            </div>
+                                          ))}
+                                        </div>
+                                      )}
+                                    </div>
                                   </div>
                                 ))}
                               </div>
                             )}
 
-                            {/* Reply button */}
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="mt-2 text-xs text-[#6B7280] hover:text-[#3B82F6] gap-1 -ml-2"
-                            >
-                              <MessageSquare size={12} />
-                              Responder
-                            </Button>
+                            {/* Reply area */}
+                            {!isReplying ? (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => { setReplyingTo(entry.id); setReplyText("") }}
+                                className="mt-2 text-xs text-[#6B7280] hover:text-[#3B82F6] gap-1 -ml-2"
+                              >
+                                <MessageSquare size={12} />
+                                Responder
+                              </Button>
+                            ) : (
+                              <div className="mt-3 pt-3 border-t border-[#E5E7EB]">
+                                <Textarea
+                                  placeholder="Escribe una respuesta..."
+                                  value={replyText}
+                                  onChange={e => setReplyText(e.target.value)}
+                                  className="bg-white border-[#E5E7EB] min-h-[70px] resize-none text-sm mb-2"
+                                  autoFocus
+                                />
+                                <div className="flex items-center justify-end gap-2">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => setReplyingTo(null)}
+                                    className="text-xs text-[#6B7280] gap-1"
+                                  >
+                                    <X size={12} />
+                                    Cancelar
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    onClick={() => handleReply(entry.id)}
+                                    disabled={!replyText.trim()}
+                                    className="text-xs bg-[#1E3A5F] hover:bg-[#2D4A6F] text-white gap-1"
+                                  >
+                                    <MessageSquare size={12} />
+                                    Publicar respuesta
+                                  </Button>
+                                </div>
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>
                     </div>
                   )
                 })}
+
+                {filteredEntries.length === 0 && (
+                  <div className="text-center py-12 text-[#9CA3AF]">
+                    <MessageSquare size={32} className="mx-auto mb-3 opacity-40" />
+                    <p className="text-sm">No hay entradas de este tipo</p>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
