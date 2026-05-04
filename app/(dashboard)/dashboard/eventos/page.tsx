@@ -627,12 +627,12 @@ export default function EventosPage() {
     const student = students.find(s => s.id === newEvent.studentId)!
     const saanee  = saaneeStaff.find(s => s.id === newEvent.saaneeId)
 
-    const participants =
-      newEvent.type === "solicitud_saanee" && saanee
-        ? [{ id: saanee.id, name: saanee.name, role: saanee.specialty, status: "pendiente", confirmedAt: null }]
-        : newEvent.type === "reunion_padres"
-          ? student.family.map(f => ({ id: f.id, name: f.name, role: f.relation, status: "pendiente", confirmedAt: null }))
-          : []
+  const participants =
+  newEvent.type === "solicitud_saanee" && saanee
+  ? [{ id: saanee.id, name: saanee.name, role: saanee.specialty, status: "pendiente", confirmedAt: null, rejectReason: null }]
+  : newEvent.type === "reunion_padres"
+  ? student.family.map(f => ({ id: f.id, name: f.name, role: f.relation, status: "pendiente", confirmedAt: null, rejectReason: null }))
+  : []
 
     const event: EventDetail = {
       id:           Date.now().toString(),
