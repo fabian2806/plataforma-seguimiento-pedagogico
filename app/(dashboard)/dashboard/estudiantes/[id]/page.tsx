@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, use } from "react"
 import Link from "next/link"
 import {
   ArrowLeft,
@@ -37,24 +37,44 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 // Mock student data
-const student = {
-  id: "1",
-  name: "Sofía Rodríguez Pérez",
-  grade: "3° Primaria",
-  age: 8,
-  birthDate: "15/03/2017",
-  status: "activo",
-  priority: false,
-  initials: "SR",
-  hearingLevel: "Hipoacusia severa bilateral",
-  hearingAid: "Audífono bilateral",
-  communicationMethod: "Lengua de Señas Peruana (LSP) + lectura labial",
-  school: "IE San Miguel",
-  teacher: "Prof. María Castro",
-  saanee: "Esp. Roberto Quispe",
-}
+const allStudents = [
+  {
+    id: "1",
+    name: "Sofía Rodríguez Pérez",
+    grade: "3° Primaria",
+    age: 8,
+    birthDate: "15/03/2017",
+    status: "activo",
+    priority: false,
+    initials: "SR",
+    hearingLevel: "Hipoacusia severa bilateral",
+    hearingAid: "Audífono bilateral",
+    communicationMethod: "Lengua de Señas Peruana (LSP) + lectura labial",
+    school: "IE San Miguel",
+    teacher: "Prof. María Castro",
+    saanee: "Esp. Roberto Quispe",
+  },
+  {
+    id: "2",
+    name: "Carlos Mendoza Ruiz",
+    grade: "4° Primaria",
+    age: 9,
+    birthDate: "08/07/2016",
+    status: "activo",
+    priority: true,
+    initials: "CM",
+    hearingLevel: "Hipoacusia profunda bilateral",
+    hearingAid: "Implante coclear unilateral",
+    communicationMethod: "Lengua de Señas Peruana (LSP)",
+    school: "IE San Miguel",
+    teacher: "Prof. Ana Torres",
+    saanee: "Esp. Roberto Quispe",
+  },
+]
 
-const familyContacts = [
+const familyContactsByStudent: Record<string, typeof familyContactsSofia> = {}
+
+const familyContactsSofia = [
   {
     name: "Elena Pérez de Rodríguez",
     relation: "Madre",
@@ -70,6 +90,26 @@ const familyContacts = [
     primary: false,
   },
 ]
+
+const familyContactsCarlos = [
+  {
+    name: "Rosa Ruiz de Mendoza",
+    relation: "Madre",
+    phone: "+51 999 111 222",
+    email: "rosa.mendoza@email.com",
+    primary: true,
+  },
+  {
+    name: "Jorge Mendoza Paredes",
+    relation: "Padre",
+    phone: "+51 999 333 444",
+    email: "jorge.mendoza@email.com",
+    primary: false,
+  },
+]
+
+familyContactsByStudent["1"] = familyContactsSofia
+familyContactsByStudent["2"] = familyContactsCarlos
 
 const bitacoraEntries = [
   {
@@ -194,6 +234,12 @@ const bitacoraEntries = [
     attachments: [],
   },
 ]
+
+// Mapa de entradas por estudiante — Carlos empieza sin entradas
+const bitacoraEntriesByStudent: Record<string, typeof bitacoraEntries> = {
+  "1": bitacoraEntries,
+  "2": [],
+}
 
 const upcomingEvents = [
   {
@@ -409,13 +455,18 @@ const ENTRY_TYPE_BORDER_COLOR: Record<string, string> = {
   feedback_saanee:        "#F9A8D4",
 }
 
-export default function ExpedientePage() {
+export default function ExpedientePage({ params }: { params: Promise<{ id: string }> }) {
+  const { id: studentId } = use(params)
+  const student = allStudents.find(s => s.id === studentId) ?? allStudents[0]
+  const familyContacts = familyContactsByStudent[studentId] ?? familyContactsSofia
+  const initialEntries = bitacoraEntriesByStudent[studentId] ?? []
+
   const [activeMainTab, setActiveMainTab] = useState<"bitacora" | "documentos">("bitacora")
   const [showVersionHistory, setShowVersionHistory] = useState<string | null>(null)
   const [activeFilter, setActiveFilter] = useState("all")
   const [replyingTo, setReplyingTo] = useState<string | null>(null)
   const [replyText, setReplyText] = useState("")
-  const [entries, setEntries] = useState(bitacoraEntries)
+  const [entries, setEntries] = useState(initialEntries)
 
   // New entry form state
   const [entryForm, setEntryForm] = useState({
@@ -1041,10 +1092,66 @@ export default function ExpedientePage() {
                 })}
 
                 {filteredEntries.length === 0 && (
-                  <div className="text-center py-12 text-[#9CA3AF]">
-                    <MessageSquare size={32} className="mx-auto mb-3 opacity-40" />
-                    <p className="text-sm">No hay entradas de este tipo</p>
-                  </div>
+                  entries.length === 0 ? (
+                    /* Bitácora completamente vacía */
+                    <div className="flex flex-col items-center py-16 px-8 text-center">
+                      <div className="w-20 h-20 rounded-2xl bg-[#EFF6FF] border-2 border-dashed border-[#BFDBFE] flex items-center justify-center mb-5">
+                        <FileText size={32} className="text-[#93C5FD]" />
+                      </div>
+                      <h3 className="text-base font-semibold text-[#1E3A5F] mb-2">
+                        La bitácora está vacía
+                      </h3>
+                      <p className="text-sm text-[#6B7280] leading-relaxed max-w-xs mb-6">
+                        Aún no hay entradas registradas para {student.name}. Selecciona un tipo de entrada arriba y publica la primera.
+                      </p>
+                      <div className="flex flex-wrap justify-center gap-2 max-w-sm">
+                        {ENTRY_TYPES.slice(0, 4).map(t => (
+                          <button
+                            key={t.id}
+                            onClick={() => {
+                              setEntryForm(f => ({ ...f, tipo: t.id }))
+                              window.scrollTo({ top: 0, behavior: "smooth" })
+                            }}
+                            className="text-xs px-3 py-1.5 rounded-full border flex items-center gap-1.5 transition-all"
+                            style={{
+                              backgroundColor: t.color.bg,
+                              borderColor: t.color.border,
+                              color: t.color.text,
+                            }}
+                          >
+                            <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: t.color.dot }} />
+                            {t.label}
+                          </button>
+                        ))}
+                      </div>
+                      <div className="mt-8 pt-6 border-t border-[#F3F4F6] w-full max-w-sm">
+                        <p className="text-[11px] text-[#9CA3AF] uppercase tracking-widest font-medium mb-3">Tipos de entrada disponibles</p>
+                        <div className="grid grid-cols-2 gap-2 text-left">
+                          {ENTRY_TYPES.map(t => (
+                            <div key={t.id} className="flex items-center gap-2 text-xs text-[#6B7280]">
+                              <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: t.color.dot }} />
+                              {t.label}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    /* Filtro sin resultados */
+                    <div className="flex flex-col items-center py-12 text-center">
+                      <div className="w-12 h-12 rounded-xl bg-[#F3F4F6] flex items-center justify-center mb-3">
+                        <MessageSquare size={22} className="text-[#D1D5DB]" />
+                      </div>
+                      <p className="text-sm font-medium text-[#374151] mb-1">Sin entradas de este tipo</p>
+                      <p className="text-xs text-[#9CA3AF]">Prueba con otro filtro o crea una nueva entrada</p>
+                      <button
+                        onClick={() => setActiveFilter("all")}
+                        className="mt-3 text-xs text-[#3B82F6] hover:underline"
+                      >
+                        Ver todas las entradas
+                      </button>
+                    </div>
+                  )
                 )}
               </div>
             </CardContent>
