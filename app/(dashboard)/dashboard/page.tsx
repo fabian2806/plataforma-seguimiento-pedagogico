@@ -8,6 +8,8 @@ import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
 import { useAuth, getRoleDisplayName, getRoleColor } from "@/lib/auth"
 import { AdminDashboard } from "@/components/admin/admin-dashboard"
+import { SaaaneeDashboard } from "@/components/saanee-dashboard"
+import { PadreDashboard } from "@/components/padre-dashboard"
 
 // Mock data - in production this would come from the database
 const stats = [
@@ -122,6 +124,15 @@ export default function DashboardPage() {
   // Admin tiene su propio dashboard
   if (user?.role === "admin") {
     return <AdminDashboard />
+  }
+
+  // SAANEE y padre tienen sus dashboards dedicados
+  if (user?.role === "saanee") {
+    return <SaaaneeDashboard name={user.name} />
+  }
+
+  if (user?.role === "padre") {
+    return <PadreDashboard name={user.name} />
   }
 
   const roleColor = getRoleColor(user?.role || "docente")
