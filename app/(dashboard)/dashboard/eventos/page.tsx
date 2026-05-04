@@ -31,13 +31,13 @@ const EVENT_TYPES = [
     id: "solicitud_saanee",
     label: "Solicitud de apoyo SAANEE",
     short: "SAANEE",
-    color: { bg: "#EFF6FF", border: "#93C5FD", text: "#2563EB", badge: "bg-[#DBEAFE] text-[#2563EB]" },
+    color: { bg: "#FDF4FF", border: "#E879F9", text: "#A21CAF", badge: "bg-[#FDF4FF] text-[#A21CAF]" },
   },
   {
     id: "reunion_padres",
     label: "Reunión con padres",
     short: "Reunión",
-    color: { bg: "#F0FDF4", border: "#86EFAC", text: "#16A34A", badge: "bg-[#DCFCE7] text-[#16A34A]" },
+    color: { bg: "#F0F9FF", border: "#7DD3FC", text: "#0284C7", badge: "bg-[#F0F9FF] text-[#0284C7]" },
   },
 ]
 
