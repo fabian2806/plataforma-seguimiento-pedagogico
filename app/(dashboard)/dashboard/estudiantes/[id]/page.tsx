@@ -398,6 +398,17 @@ const MOCK_EVENTOS = [
   { id: "ev-2", label: "Sesión SAANEE · 1 Abr 2025" },
 ]
 
+const ENTRY_TYPE_BORDER_COLOR: Record<string, string> = {
+  observacion_pe:         "#93C5FD",
+  comunicacion_familiar:  "#7DD3FC",
+  incidencia:             "#FCA5A5",
+  apoyo_ajuste:           "#6EE7B7",
+  evaluacion_indicador:   "#C4B5FD",
+  evento_agenda:          "#FCD34D",
+  documento:              "#D1D5DB",
+  feedback_saanee:        "#F9A8D4",
+}
+
 export default function ExpedientePage() {
   const [activeMainTab, setActiveMainTab] = useState<"bitacora" | "documentos">("bitacora")
   const [showVersionHistory, setShowVersionHistory] = useState<string | null>(null)
@@ -703,7 +714,12 @@ export default function ExpedientePage() {
             </CardHeader>
             <CardContent>
               {/* New Entry Form */}
-              <div className="mb-6 rounded-lg bg-[#F9FAFB] border border-[#E5E7EB] overflow-hidden">
+              <div
+                className="mb-6 rounded-lg bg-[#F9FAFB] overflow-hidden transition-all duration-200"
+                style={{
+                  border: `2px solid ${entryForm.tipo ? ENTRY_TYPE_BORDER_COLOR[entryForm.tipo] : "#E5E7EB"}`,
+                }}
+              >
                 {/* Type selector */}
                 <div className="px-4 pt-4 pb-3 border-b border-[#E5E7EB]">
                   <p className="text-xs font-medium text-[#6B7280] uppercase tracking-wide mb-2">Tipo de entrada</p>
