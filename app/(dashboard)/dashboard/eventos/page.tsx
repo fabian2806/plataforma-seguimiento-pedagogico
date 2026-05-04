@@ -82,11 +82,19 @@ const saaneeStaff = [
   { id: "s3", name: "Luis Ramírez",   specialty: "Terapista de lenguaje", initials: "LR" },
 ]
 
+// "viewer" simulates who is currently looking at the app:
+// "docente" = Prof. María Castro (creator), "saanee" = Roberto Quispe, "padre" = Elena Pérez
+// In a real app this would come from auth context.
+type ViewerRole = "docente" | "saanee" | "padre"
+
+const DEMO_VIEWER: ViewerRole = "docente"
+
 const initialEvents = [
+  // ── Evento 1: Reunión padres — vista docente, una madre confirmó, padre pendiente
   {
     id: "1",
     title: "Reunión con familia Rodríguez",
-    date: "2025-03-26",
+    date: "2025-05-10",
     time: "10:00 AM",
     duration: "45 min",
     type: "reunion_padres",
@@ -96,16 +104,18 @@ const initialEvents = [
     studentId: "1",
     notes: "Revisar avances del trimestre y metas para el siguiente período.",
     participants: [
-      { id: "f1", name: "Elena Pérez de Rodríguez", role: "Madre",  status: "confirmado",  confirmedAt: "20 Mar 2025" },
-      { id: "f2", name: "Juan Rodríguez Torres",    role: "Padre",  status: "pendiente",   confirmedAt: null },
+      { id: "f1", name: "Elena Pérez de Rodríguez", role: "Madre", status: "confirmado", confirmedAt: "28 Abr 2025", rejectReason: null },
+      { id: "f2", name: "Juan Rodríguez Torres",    role: "Padre", status: "pendiente",  confirmedAt: null,            rejectReason: null },
     ],
     createdBy: "Prof. María Castro",
     status: "pendiente",
+    viewerRole: "docente" as ViewerRole,
   },
+  // ── Evento 2: Solicitud SAANEE — vista docente, SAANEE pendiente
   {
     id: "2",
-    title: "Solicitud apoyo SAANEE - Carlos",
-    date: "2025-03-27",
+    title: "Solicitud apoyo SAANEE — Carlos",
+    date: "2025-05-12",
     time: "11:30 AM",
     duration: "30 min",
     type: "solicitud_saanee",
@@ -115,17 +125,99 @@ const initialEvents = [
     studentId: "2",
     notes: "Evaluación de estrategias de comunicación con LSP.",
     participants: [
-      { id: "s1", name: "Roberto Quispe", role: "Especialista SAANEE", status: "pendiente", confirmedAt: null },
+      { id: "s1", name: "Roberto Quispe", role: "Especialista SAANEE", status: "pendiente", confirmedAt: null, rejectReason: null },
     ],
     createdBy: "Prof. María Castro",
     status: "pendiente",
+    viewerRole: "docente" as ViewerRole,
+  },
+  // ── Evento 3: Vista del SAANEE — pendiente de responder
+  {
+    id: "3",
+    title: "Evaluación auditiva — Sofía Rodríguez",
+    date: "2025-05-14",
+    time: "9:00 AM",
+    duration: "60 min",
+    type: "solicitud_saanee",
+    modality: "Presencial",
+    location: "Sala SAANEE",
+    student: "Sofía Rodríguez",
+    studentId: "1",
+    notes: "Revisión semestral del plan de atención y ajuste de estrategias de comunicación.",
+    participants: [
+      { id: "s1", name: "Roberto Quispe", role: "Especialista SAANEE", status: "pendiente", confirmedAt: null, rejectReason: null },
+    ],
+    createdBy: "Prof. María Castro",
+    status: "pendiente",
+    viewerRole: "saanee" as ViewerRole,
+  },
+  // ── Evento 4: Vista del padre — pendiente de responder
+  {
+    id: "4",
+    title: "Reunión de seguimiento — Carlos Mendoza",
+    date: "2025-05-16",
+    time: "3:00 PM",
+    duration: "45 min",
+    type: "reunion_padres",
+    modality: "Presencial",
+    location: "Sala de reuniones",
+    student: "Carlos Mendoza",
+    studentId: "2",
+    notes: "Presentación de los avances del bimestre y coordinación de estrategias en casa.",
+    participants: [
+      { id: "f3", name: "Rosa Ruiz de Mendoza",   role: "Madre", status: "pendiente", confirmedAt: null, rejectReason: null },
+      { id: "f4", name: "Jorge Mendoza Paredes",   role: "Padre", status: "pendiente", confirmedAt: null, rejectReason: null },
+    ],
+    createdBy: "Prof. María Castro",
+    status: "pendiente",
+    viewerRole: "padre" as ViewerRole,
+  },
+  // ── Evento 5: Confirmado — vista docente
+  {
+    id: "5",
+    title: "Taller de estrategias LSP — Ana Torres",
+    date: "2025-05-08",
+    time: "2:00 PM",
+    duration: "60 min",
+    type: "solicitud_saanee",
+    modality: "Virtual",
+    location: "https://meet.google.com/abc-defg",
+    student: "Ana Torres",
+    studentId: "3",
+    notes: "Revisión de técnicas de comunicación visual y señas básicas con la docente.",
+    participants: [
+      { id: "s2", name: "Ana Flores", role: "Psicóloga educativa", status: "confirmado", confirmedAt: "5 May 2025", rejectReason: null },
+    ],
+    createdBy: "Prof. María Castro",
+    status: "confirmado",
+    viewerRole: "docente" as ViewerRole,
+  },
+  // ── Evento 6: Rechazado con motivo y fecha — vista docente
+  {
+    id: "6",
+    title: "Reunión bimestral — Familia Torres",
+    date: "2025-05-06",
+    time: "11:00 AM",
+    duration: "30 min",
+    type: "reunion_padres",
+    modality: "Presencial",
+    location: "Sala de reuniones",
+    student: "Ana Torres",
+    studentId: "3",
+    notes: "Seguimiento del plan de comunicación establecido al inicio del año.",
+    participants: [
+      { id: "f5", name: "Carmen Torres Vidal", role: "Madre", status: "rechazado", confirmedAt: "3 May 2025", rejectReason: "No tengo disponibilidad ese día" },
+    ],
+    createdBy: "Prof. María Castro",
+    status: "rechazado",
+    viewerRole: "docente" as ViewerRole,
   },
 ]
 
 const pastEvents = [
   {
-    id: "5",
-    title: "Reunión inicio de año - Familia Rodríguez",
+    id: "p1",
+    title: "Reunión inicio de año — Familia Rodríguez",
     date: "2025-03-10",
     time: "10:00 AM",
     type: "reunion_padres",
@@ -133,8 +225,8 @@ const pastEvents = [
     status: "completado",
   },
   {
-    id: "6",
-    title: "Apoyo SAANEE - Evaluación comunicación",
+    id: "p2",
+    title: "Apoyo SAANEE — Evaluación comunicación",
     date: "2025-03-05",
     time: "11:00 AM",
     type: "solicitud_saanee",
@@ -193,14 +285,27 @@ function EventDetailModal({
   const [rejectReason, setRejectReason] = useState("")
   const [rejectCustom, setRejectCustom] = useState("")
 
-  // Simulated current user role: "creador" | "participante_pendiente" | "participante_respondido"
-  const currentUserRole = "creador"
+  // viewerRole comes from the event itself (mock), in production from auth context
+  const viewerRole: ViewerRole = (event as any).viewerRole ?? "docente"
+
+  // For participant views, find the current viewer's participant entry
+  const viewerParticipantId = viewerRole === "saanee" ? "s1" : viewerRole === "padre" ? "f3" : null
+  const viewerParticipant = viewerParticipantId
+    ? event.participants.find((p: any) => p.id === viewerParticipantId) ?? event.participants[0]
+    : null
+  const viewerAlreadyResponded = viewerParticipant && viewerParticipant.status !== "pendiente"
+
+  // Rejected event info
+  const rejectedParticipant = event.participants.find((p: any) => p.status === "rechazado")
 
   const handleConfirmAttendance = () => {
     const updated = {
       ...event,
-      participants: event.participants.map((p, i) =>
-        i === 0 ? { ...p, status: "confirmado", confirmedAt: new Date().toLocaleDateString("es-PE", { day: "2-digit", month: "short", year: "numeric" }) } : p
+      status: "confirmado",
+      participants: event.participants.map((p: any) =>
+        p.id === viewerParticipant?.id
+          ? { ...p, status: "confirmado", confirmedAt: new Date().toLocaleDateString("es-PE", { day: "2-digit", month: "short", year: "numeric" }) }
+          : p
       ),
     }
     onUpdate(updated)
@@ -210,8 +315,11 @@ function EventDetailModal({
     const reason = rejectReason === "Otro" ? rejectCustom : rejectReason
     const updated = {
       ...event,
-      participants: event.participants.map((p, i) =>
-        i === 0 ? { ...p, status: "rechazado", confirmedAt: new Date().toLocaleDateString("es-PE", { day: "2-digit", month: "short", year: "numeric" }), rejectReason: reason } : p
+      status: "rechazado",
+      participants: event.participants.map((p: any) =>
+        p.id === viewerParticipant?.id
+          ? { ...p, status: "rechazado", confirmedAt: new Date().toLocaleDateString("es-PE", { day: "2-digit", month: "short", year: "numeric" }), rejectReason: reason }
+          : p
       ),
     }
     onUpdate(updated)
@@ -223,23 +331,52 @@ function EventDetailModal({
       <Dialog open onOpenChange={onClose}>
         <DialogContent className="sm:max-w-[580px] max-h-[90vh] overflow-y-auto p-0">
           {/* Header */}
-          <div className="px-6 pt-6 pb-4 border-b border-[#E5E7EB]">
+          <div
+            className="px-6 pt-6 pb-4 border-b border-[#E5E7EB]"
+            style={{ borderLeft: `4px solid ${typeConfig?.color.border ?? "#E5E7EB"}` }}
+          >
             <div className="flex items-start justify-between gap-3 mb-3">
               <div className="flex items-center gap-2 flex-wrap">
                 {typeConfig && (
-                  <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${typeConfig.color.badge}`}>
+                  <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${typeConfig.color.badge}`}
+                    style={{ backgroundColor: typeConfig.color.bg, color: typeConfig.color.text }}>
                     {typeConfig.label}
                   </span>
                 )}
                 <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${getStatusStyle(event.status).bg} ${getStatusStyle(event.status).text}`}>
                   {getStatusStyle(event.status).label}
                 </span>
+                {viewerRole !== "docente" && (
+                  <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-[#EFF6FF] text-[#2563EB]">
+                    {viewerRole === "saanee" ? "Vista: Especialista SAANEE" : "Vista: Familiar"}
+                  </span>
+                )}
               </div>
             </div>
             <h2 className="text-lg font-bold text-[#1E3A5F]">{event.title}</h2>
+            <p className="text-xs text-[#9CA3AF] mt-1">Creado por {(event as any).createdBy}</p>
           </div>
 
           <div className="px-6 py-4 space-y-5">
+            {/* Alerta de rechazo — sección destacada */}
+            {event.status === "rechazado" && rejectedParticipant && (
+              <div className="flex items-start gap-3 p-4 rounded-lg bg-[#FEF2F2] border border-[#FECACA]">
+                <AlertCircle size={18} className="text-[#DC2626] shrink-0 mt-0.5" />
+                <div className="space-y-1">
+                  <p className="text-sm font-semibold text-[#DC2626]">Invitación rechazada</p>
+                  <p className="text-xs text-[#7F1D1D]">
+                    <span className="font-medium">{rejectedParticipant.name}</span> rechazó el{" "}
+                    <span className="font-medium">{rejectedParticipant.confirmedAt}</span>
+                  </p>
+                  {rejectedParticipant.rejectReason && (
+                    <p className="text-xs text-[#991B1B]">
+                      Motivo: <span className="italic">&quot;{rejectedParticipant.rejectReason}&quot;</span>
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* Info principal */}
             <div className="grid grid-cols-2 gap-3">
               <div className="p-3 rounded-lg bg-[#F9FAFB] space-y-0.5">
@@ -250,17 +387,17 @@ function EventDetailModal({
               </div>
               <div className="p-3 rounded-lg bg-[#F9FAFB] space-y-0.5">
                 <p className="text-[10px] font-semibold text-[#9CA3AF] uppercase tracking-wide">Duración</p>
-                <p className="text-sm text-[#374151] font-medium">{event.duration}</p>
+                <p className="text-sm text-[#374151] font-medium">{(event as any).duration ?? "—"}</p>
               </div>
               <div className="p-3 rounded-lg bg-[#F9FAFB] space-y-0.5">
                 <p className="text-[10px] font-semibold text-[#9CA3AF] uppercase tracking-wide">Modalidad</p>
-                <p className="text-sm text-[#374151] font-medium">{event.modality}</p>
+                <p className="text-sm text-[#374151] font-medium">{(event as any).modality ?? "Presencial"}</p>
               </div>
               <div className="p-3 rounded-lg bg-[#F9FAFB] space-y-0.5">
                 <p className="text-[10px] font-semibold text-[#9CA3AF] uppercase tracking-wide">
-                  {event.location?.includes("http") ? "Enlace" : "Ubicación"}
+                  {(event as any).location?.includes("http") ? "Enlace" : "Ubicación"}
                 </p>
-                <p className="text-sm text-[#374151] font-medium">{event.location}</p>
+                <p className="text-sm text-[#374151] font-medium">{(event as any).location ?? "Por definir"}</p>
               </div>
             </div>
 
@@ -268,7 +405,7 @@ function EventDetailModal({
             <div>
               <p className="text-[10px] font-semibold text-[#9CA3AF] uppercase tracking-wide mb-2">Estudiante</p>
               <div className="flex items-center gap-2 p-2.5 rounded-lg bg-[#EFF6FF] border border-[#BFDBFE]">
-                <Avatar initials={event.student.split(" ").map(n => n[0]).join("").slice(0, 2)} size="sm" />
+                <Avatar initials={event.student.split(" ").map((n: string) => n[0]).join("").slice(0, 2)} size="sm" />
                 <span className="text-sm font-medium text-[#1E3A5F]">{event.student}</span>
               </div>
             </div>
@@ -279,17 +416,24 @@ function EventDetailModal({
               <div className="space-y-2">
                 {event.participants.map((p: any, idx: number) => {
                   const st = getStatusStyle(p.status)
+                  const isViewerEntry = viewerParticipant && p.id === viewerParticipant.id
                   return (
-                    <div key={idx} className="flex items-center gap-3 p-3 rounded-lg border border-[#E5E7EB] bg-white">
+                    <div
+                      key={idx}
+                      className={`flex items-center gap-3 p-3 rounded-lg border bg-white ${isViewerEntry ? "border-[#BFDBFE] ring-1 ring-[#BFDBFE]" : "border-[#E5E7EB]"}`}
+                    >
                       <Avatar initials={p.name.split(" ").map((n: string) => n[0]).join("").slice(0, 2)} size="sm" />
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-[#374151]">{p.name}</p>
+                        <div className="flex items-center gap-1.5">
+                          <p className="text-sm font-medium text-[#374151]">{p.name}</p>
+                          {isViewerEntry && <span className="text-[10px] text-[#2563EB] font-medium">(tú)</span>}
+                        </div>
                         <p className="text-xs text-[#9CA3AF]">{p.role}</p>
-                        {p.confirmedAt && (
-                          <p className="text-[11px] text-[#9CA3AF]">
-                            {p.status === "rechazado" ? "Rechazó el" : "Confirmó el"} {p.confirmedAt}
-                            {p.rejectReason && ` · ${p.rejectReason}`}
-                          </p>
+                        {p.confirmedAt && p.status === "confirmado" && (
+                          <p className="text-[11px] text-[#059669]">Confirmó el {p.confirmedAt}</p>
+                        )}
+                        {p.confirmedAt && p.status === "rechazado" && (
+                          <p className="text-[11px] text-[#DC2626]">Rechazó el {p.confirmedAt}</p>
                         )}
                       </div>
                       <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full ${st.bg} ${st.text}`}>
@@ -311,9 +455,10 @@ function EventDetailModal({
           </div>
 
           {/* Footer acciones */}
-          <div className="px-6 py-4 border-t border-[#E5E7EB] flex items-center justify-between gap-2">
-            {currentUserRole === "creador" ? (
-              <div className="flex gap-2 w-full justify-end">
+          <div className="px-6 py-4 border-t border-[#E5E7EB]">
+            {viewerRole === "docente" ? (
+              /* Docente: editar / cancelar */
+              <div className="flex gap-2 justify-end">
                 <Button variant="outline" size="sm" className="text-[#DC2626] border-[#FECACA] hover:bg-[#FEF2F2] text-xs">
                   Cancelar evento
                 </Button>
@@ -321,24 +466,47 @@ function EventDetailModal({
                   Editar evento
                 </Button>
               </div>
+            ) : viewerAlreadyResponded ? (
+              /* Participante que ya respondió */
+              <div className="flex items-center gap-2 justify-center py-1">
+                {viewerParticipant?.status === "confirmado" ? (
+                  <>
+                    <Check size={15} className="text-[#059669]" />
+                    <p className="text-sm text-[#059669] font-medium">Ya confirmaste tu asistencia</p>
+                  </>
+                ) : (
+                  <>
+                    <X size={15} className="text-[#DC2626]" />
+                    <p className="text-sm text-[#DC2626] font-medium">Ya rechazaste esta invitación</p>
+                  </>
+                )}
+              </div>
             ) : (
-              <div className="flex gap-2 w-full justify-end">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowRejectModal(true)}
-                  className="text-[#DC2626] border-[#FECACA] hover:bg-[#FEF2F2] text-xs"
-                >
-                  Rechazar
-                </Button>
-                <Button
-                  size="sm"
-                  onClick={handleConfirmAttendance}
-                  className="bg-[#059669] hover:bg-[#047857] text-white text-xs gap-1.5"
-                >
-                  <Check size={13} />
-                  Confirmar asistencia
-                </Button>
+              /* Participante pendiente */
+              <div className="space-y-2">
+                <p className="text-xs text-[#6B7280] text-center mb-3">
+                  {viewerRole === "saanee"
+                    ? "El docente solicita tu participación en este apoyo."
+                    : "El docente te invita a esta reunión de seguimiento."}
+                </p>
+                <div className="flex gap-2 justify-end">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowRejectModal(true)}
+                    className="text-[#DC2626] border-[#FECACA] hover:bg-[#FEF2F2] text-xs"
+                  >
+                    Rechazar invitación
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={handleConfirmAttendance}
+                    className="bg-[#059669] hover:bg-[#047857] text-white text-xs gap-1.5"
+                  >
+                    <Check size={13} />
+                    Confirmar asistencia
+                  </Button>
+                </div>
               </div>
             )}
           </div>
@@ -350,7 +518,7 @@ function EventDetailModal({
         <DialogContent className="sm:max-w-[380px]">
           <DialogHeader>
             <DialogTitle className="text-base font-semibold text-[#1E3A5F]">
-              &iquest;Por qu&eacute; rechazas la invitaci&oacute;n?
+              {"¿Por qué rechazas la invitación?"}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-3 pt-1">
