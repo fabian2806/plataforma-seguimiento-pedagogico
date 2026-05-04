@@ -376,14 +376,14 @@ function getRoleColor(role: string) {
 
 // Tipo entrada config
 const ENTRY_TYPES = [
-  { id: "observacion_pe",       label: "Obs. Pedagógica",    short: "OBS",  hasImportancia: true,  hasSeveridad: true,  hasIndicador: false, hasEvento: false, hasResultado: false },
-  { id: "comunicacion_familiar",label: "Comunicación Fam.",  short: "COM",  hasImportancia: true,  hasSeveridad: true,  hasIndicador: false, hasEvento: false, hasResultado: false },
-  { id: "incidencia",           label: "Incidencia",         short: "INC",  hasImportancia: false, hasSeveridad: true,  hasIndicador: false, hasEvento: false, hasResultado: true  },
-  { id: "apoyo_ajuste",         label: "Apoyo o Ajuste",     short: "APO",  hasImportancia: false, hasSeveridad: false, hasIndicador: false, hasEvento: false, hasResultado: false },
-  { id: "evaluacion_indicador", label: "Eval. Indicador",    short: "EVA",  hasImportancia: false, hasSeveridad: false, hasIndicador: true,  hasEvento: false, hasResultado: true  },
-  { id: "evento_agenda",        label: "Evento Agenda",      short: "EVT",  hasImportancia: false, hasSeveridad: false, hasIndicador: false, hasEvento: true,  hasResultado: false },
-  { id: "documento",            label: "Documento",          short: "DOC",  hasImportancia: false, hasSeveridad: false, hasIndicador: false, hasEvento: false, hasResultado: false },
-  { id: "feedback_saanee",      label: "Feedback SAANEE",    short: "SAA",  hasImportancia: true,  hasSeveridad: true,  hasIndicador: false, hasEvento: false, hasResultado: false },
+  { id: "observacion_pe",        label: "Obs. Pedagógica",   short: "OBS", hasImportancia: true,  hasSeveridad: true,  hasIndicador: false, hasEvento: false, hasResultado: false, color: { bg: "#EFF6FF", border: "#93C5FD", text: "#2563EB", dot: "#3B82F6" } },
+  { id: "comunicacion_familiar", label: "Comunicación Fam.", short: "COM", hasImportancia: true,  hasSeveridad: true,  hasIndicador: false, hasEvento: false, hasResultado: false, color: { bg: "#F0F9FF", border: "#7DD3FC", text: "#0284C7", dot: "#0EA5E9" } },
+  { id: "incidencia",            label: "Incidencia",        short: "INC", hasImportancia: false, hasSeveridad: true,  hasIndicador: false, hasEvento: false, hasResultado: true,  color: { bg: "#FEF2F2", border: "#FCA5A5", text: "#DC2626", dot: "#EF4444" } },
+  { id: "apoyo_ajuste",          label: "Apoyo o Ajuste",    short: "APO", hasImportancia: false, hasSeveridad: false, hasIndicador: false, hasEvento: false, hasResultado: false, color: { bg: "#ECFDF5", border: "#6EE7B7", text: "#059669", dot: "#10B981" } },
+  { id: "evaluacion_indicador",  label: "Eval. Indicador",   short: "EVA", hasImportancia: false, hasSeveridad: false, hasIndicador: true,  hasEvento: false, hasResultado: true,  color: { bg: "#F5F3FF", border: "#C4B5FD", text: "#7C3AED", dot: "#8B5CF6" } },
+  { id: "evento_agenda",         label: "Evento Agenda",     short: "EVT", hasImportancia: false, hasSeveridad: false, hasIndicador: false, hasEvento: true,  hasResultado: false, color: { bg: "#FFFBEB", border: "#FCD34D", text: "#B45309", dot: "#F59E0B" } },
+  { id: "documento",             label: "Documento",         short: "DOC", hasImportancia: false, hasSeveridad: false, hasIndicador: false, hasEvento: false, hasResultado: false, color: { bg: "#F9FAFB", border: "#D1D5DB", text: "#374151", dot: "#9CA3AF" } },
+  { id: "feedback_saanee",       label: "Feedback SAANEE",   short: "SAA", hasImportancia: true,  hasSeveridad: true,  hasIndicador: false, hasEvento: false, hasResultado: false, color: { bg: "#FDF4FF", border: "#E879F9", text: "#A21CAF", dot: "#D946EF" } },
 ]
 
 const MOCK_INDICADORES = [
@@ -715,28 +715,50 @@ export default function ExpedientePage() {
             <CardContent>
               {/* New Entry Form */}
               <div
-                className="mb-6 rounded-lg bg-[#F9FAFB] overflow-hidden transition-all duration-200"
+                className="mb-6 rounded-lg overflow-hidden transition-all duration-300 flex"
                 style={{
-                  border: `2px solid ${entryForm.tipo ? ENTRY_TYPE_BORDER_COLOR[entryForm.tipo] : "#E5E7EB"}`,
+                  border: `1px solid ${selectedType ? selectedType.color.border : "#E5E7EB"}`,
+                  backgroundColor: selectedType ? selectedType.color.bg : "#F9FAFB",
                 }}
               >
+                {/* Left accent bar */}
+                <div
+                  className="w-1 shrink-0 rounded-l-lg transition-all duration-300"
+                  style={{ backgroundColor: selectedType ? selectedType.color.border : "#E5E7EB" }}
+                />
+
+                <div className="flex-1 min-w-0">
                 {/* Type selector */}
-                <div className="px-4 pt-4 pb-3 border-b border-[#E5E7EB]">
-                  <p className="text-xs font-medium text-[#6B7280] uppercase tracking-wide mb-2">Tipo de entrada</p>
+                <div className="px-4 pt-4 pb-3 border-b border-[#E5E7EB]/60">
+                  <p className="text-[10px] font-semibold text-[#9CA3AF] uppercase tracking-widest mb-2">Tipo de entrada</p>
                   <div className="flex flex-wrap gap-1.5">
-                    {ENTRY_TYPES.map(t => (
-                      <button
-                        key={t.id}
-                        onClick={() => setEntryForm(f => ({ ...f, tipo: f.tipo === t.id ? "" : t.id }))}
-                        className={`text-xs px-3 py-1 rounded-full border transition-colors ${
-                          entryForm.tipo === t.id
-                            ? "bg-[#1E3A5F] text-white border-[#1E3A5F]"
-                            : "bg-white text-[#374151] border-[#E5E7EB] hover:border-[#1E3A5F] hover:text-[#1E3A5F]"
-                        }`}
-                      >
-                        {t.label}
-                      </button>
-                    ))}
+                    {ENTRY_TYPES.map(t => {
+                      const isSelected = entryForm.tipo === t.id
+                      return (
+                        <button
+                          key={t.id}
+                          onClick={() => setEntryForm(f => ({ ...f, tipo: f.tipo === t.id ? "" : t.id }))}
+                          className="text-xs px-3 py-1 rounded-full border transition-all duration-150 flex items-center gap-1.5"
+                          style={isSelected ? {
+                            backgroundColor: t.color.bg,
+                            borderColor: t.color.border,
+                            color: t.color.text,
+                            fontWeight: 600,
+                            boxShadow: `0 0 0 2px ${t.color.border}`,
+                          } : {
+                            backgroundColor: "white",
+                            borderColor: "#E5E7EB",
+                            color: "#6B7280",
+                          }}
+                        >
+                          <span
+                            className="w-1.5 h-1.5 rounded-full shrink-0"
+                            style={{ backgroundColor: t.color.dot }}
+                          />
+                          {t.label}
+                        </button>
+                      )
+                    })}
                   </div>
                 </div>
 
@@ -747,7 +769,8 @@ export default function ExpedientePage() {
                       placeholder="Título (opcional)"
                       value={entryForm.titulo}
                       onChange={e => setEntryForm(f => ({ ...f, titulo: e.target.value }))}
-                      className="mb-2 bg-white border-[#E5E7EB] text-sm h-8"
+                      className="mb-2 bg-white text-sm h-8 transition-colors duration-200"
+                      style={{ borderColor: selectedType ? selectedType.color.border : "#E5E7EB" }}
                     />
                   )}
                   <Textarea
@@ -764,7 +787,8 @@ export default function ExpedientePage() {
                     }
                     value={entryForm.contenido}
                     onChange={e => setEntryForm(f => ({ ...f, contenido: e.target.value }))}
-                    className="bg-white border-[#E5E7EB] min-h-[90px] resize-none text-sm"
+                    className="min-h-[90px] resize-none text-sm bg-white transition-colors duration-200"
+                    style={{ borderColor: selectedType ? selectedType.color.border : "#E5E7EB" }}
                     disabled={!entryForm.tipo}
                   />
                 </div>
@@ -839,13 +863,17 @@ export default function ExpedientePage() {
                   </Button>
                   <Button
                     size="sm"
-                    className="bg-[#1E3A5F] hover:bg-[#2D4A6F] text-white gap-1.5 text-xs"
+                    className="gap-1.5 text-xs text-white transition-all duration-200"
+                    style={{
+                      backgroundColor: selectedType ? selectedType.color.dot : "#1E3A5F",
+                    }}
                     disabled={!entryForm.tipo || !entryForm.contenido.trim()}
                     onClick={handlePublish}
                   >
                     <MessageSquare size={13} />
                     Publicar entrada
                   </Button>
+                </div>
                 </div>
               </div>
 
