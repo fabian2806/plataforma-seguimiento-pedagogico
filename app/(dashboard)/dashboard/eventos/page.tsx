@@ -1,7 +1,21 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Calendar, Plus, Clock, MapPin, ChevronLeft, ChevronRight, Video, User, X } from "lucide-react"
+import {
+  Calendar,
+  Plus,
+  Clock,
+  MapPin,
+  ChevronLeft,
+  ChevronRight,
+  Video,
+  User,
+  X,
+  Search,
+  Check,
+  AlertCircle,
+  Users,
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -11,7 +25,63 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 
-// Initial mock events data
+// ─── Tipos de evento ───────────────────────────────────────────────────────────
+const EVENT_TYPES = [
+  {
+    id: "solicitud_saanee",
+    label: "Solicitud de apoyo SAANEE",
+    short: "SAANEE",
+    color: { bg: "#EFF6FF", border: "#93C5FD", text: "#2563EB", badge: "bg-[#DBEAFE] text-[#2563EB]" },
+  },
+  {
+    id: "reunion_padres",
+    label: "Reunión con padres",
+    short: "Reunión",
+    color: { bg: "#F0FDF4", border: "#86EFAC", text: "#16A34A", badge: "bg-[#DCFCE7] text-[#16A34A]" },
+  },
+]
+
+function getEventTypeConfig(type: string) {
+  return EVENT_TYPES.find(t => t.id === type) ?? null
+}
+
+// ─── Datos mock ────────────────────────────────────────────────────────────────
+const students = [
+  {
+    id: "1",
+    name: "Sofía Rodríguez",
+    grade: "3° Primaria",
+    initials: "SR",
+    family: [
+      { id: "f1", name: "Elena Pérez de Rodríguez", relation: "Madre" },
+      { id: "f2", name: "Juan Rodríguez Torres", relation: "Padre" },
+    ],
+  },
+  {
+    id: "2",
+    name: "Carlos Mendoza",
+    grade: "4° Primaria",
+    initials: "CM",
+    family: [
+      { id: "f3", name: "Rosa Ruiz de Mendoza", relation: "Madre" },
+      { id: "f4", name: "Jorge Mendoza Paredes", relation: "Padre" },
+    ],
+  },
+  {
+    id: "3",
+    name: "Ana Torres",
+    grade: "2° Primaria",
+    initials: "AT",
+    family: [],
+  },
+]
+
+const saaneeStaff = [
+  { id: "s1", name: "Roberto Quispe", specialty: "Especialista SAANEE", initials: "RQ" },
+  { id: "s2", name: "Ana Flores",     specialty: "Psicóloga educativa",  initials: "AF" },
+  { id: "s3", name: "Luis Ramírez",   specialty: "Terapista de lenguaje", initials: "LR" },
+]
+
 const initialEvents = [
   {
     id: "1",
@@ -19,47 +89,36 @@ const initialEvents = [
     date: "2025-03-26",
     time: "10:00 AM",
     duration: "45 min",
-    type: "reunion_familiar",
+    type: "reunion_padres",
+    modality: "Presencial",
     location: "Sala de reuniones",
     student: "Sofía Rodríguez",
-    attendees: ["Elena Pérez", "Juan Rodríguez", "Esp. Roberto Quispe"],
-    status: "confirmado",
-  },
-  {
-    id: "2",
-    title: "Evaluación trimestral - Carlos",
-    date: "2025-03-27",
-    time: "11:30 AM",
-    duration: "30 min",
-    type: "evaluacion",
-    location: "Aula 3B",
-    student: "Carlos Mendoza",
-    attendees: ["Esp. Ana Torres"],
+    studentId: "1",
+    notes: "Revisar avances del trimestre y metas para el siguiente período.",
+    participants: [
+      { id: "f1", name: "Elena Pérez de Rodríguez", role: "Madre",  status: "confirmado",  confirmedAt: "20 Mar 2025" },
+      { id: "f2", name: "Juan Rodríguez Torres",    role: "Padre",  status: "pendiente",   confirmedAt: null },
+    ],
+    createdBy: "Prof. María Castro",
     status: "pendiente",
   },
   {
-    id: "3",
-    title: "Capacitación LSP - Nivel intermedio",
-    date: "2025-03-28",
-    time: "3:00 PM",
-    duration: "2 hrs",
-    type: "capacitacion",
-    location: "Virtual - Zoom",
-    student: null,
-    attendees: ["Equipo SAANEE"],
-    status: "confirmado",
-  },
-  {
-    id: "4",
-    title: "Observación de aula - SAANEE",
-    date: "2025-03-31",
-    time: "9:00 AM",
-    duration: "1 hr",
-    type: "observacion",
+    id: "2",
+    title: "Solicitud apoyo SAANEE - Carlos",
+    date: "2025-03-27",
+    time: "11:30 AM",
+    duration: "30 min",
+    type: "solicitud_saanee",
+    modality: "Presencial",
     location: "Aula 3B",
-    student: null,
-    attendees: ["Esp. Roberto Quispe"],
-    status: "confirmado",
+    student: "Carlos Mendoza",
+    studentId: "2",
+    notes: "Evaluación de estrategias de comunicación con LSP.",
+    participants: [
+      { id: "s1", name: "Roberto Quispe", role: "Especialista SAANEE", status: "pendiente", confirmedAt: null },
+    ],
+    createdBy: "Prof. María Castro",
+    status: "pendiente",
   },
 ]
 
@@ -69,72 +128,315 @@ const pastEvents = [
     title: "Reunión inicio de año - Familia Rodríguez",
     date: "2025-03-10",
     time: "10:00 AM",
-    type: "reunion_familiar",
+    type: "reunion_padres",
     student: "Sofía Rodríguez",
     status: "completado",
   },
   {
     id: "6",
-    title: "Evaluación mensual - Comunicación",
+    title: "Apoyo SAANEE - Evaluación comunicación",
     date: "2025-03-05",
     time: "11:00 AM",
-    type: "evaluacion",
+    type: "solicitud_saanee",
     student: "Sofía Rodríguez",
     status: "completado",
   },
 ]
 
-function getEventTypeStyle(type: string) {
-  switch (type) {
-    case "reunion_familiar":
-      return { bg: "bg-[#E0F2FE]", border: "border-[#BAE6FD]", text: "text-[#0284C7]", label: "Reunión familiar" }
-    case "evaluacion":
-      return { bg: "bg-[#F3E8FF]", border: "border-[#DDD6FE]", text: "text-[#7C3AED]", label: "Evaluación" }
-    case "capacitacion":
-      return { bg: "bg-[#ECFDF5]", border: "border-[#A7F3D0]", text: "text-[#059669]", label: "Capacitación" }
-    case "observacion":
-      return { bg: "bg-[#FEF3C7]", border: "border-[#FDE68A]", text: "text-[#D97706]", label: "Observación" }
-    default:
-      return { bg: "bg-[#F3F4F6]", border: "border-[#E5E7EB]", text: "text-[#6B7280]", label: "Otro" }
-  }
-}
-
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 function getStatusStyle(status: string) {
   switch (status) {
-    case "confirmado":
-      return { bg: "bg-[#D1FAE5]", text: "text-[#059669]" }
-    case "pendiente":
-      return { bg: "bg-[#FEF3C7]", text: "text-[#D97706]" }
-    case "completado":
-      return { bg: "bg-[#F3F4F6]", text: "text-[#6B7280]" }
-    default:
-      return { bg: "bg-[#F3F4F6]", text: "text-[#6B7280]" }
+    case "confirmado":  return { bg: "bg-[#D1FAE5]", text: "text-[#059669]", label: "Confirmado" }
+    case "pendiente":   return { bg: "bg-[#FEF3C7]", text: "text-[#D97706]", label: "Pendiente" }
+    case "rechazado":   return { bg: "bg-[#FEE2E2]", text: "text-[#DC2626]", label: "Rechazado" }
+    case "completado":  return { bg: "bg-[#F3F4F6]", text: "text-[#6B7280]", label: "Completado" }
+    case "cancelado":   return { bg: "bg-[#FEE2E2]", text: "text-[#DC2626]", label: "Cancelado" }
+    default:            return { bg: "bg-[#F3F4F6]", text: "text-[#6B7280]", label: status }
   }
 }
 
-// Students for selection
-const students = [
-  { id: "1", name: "Sofía Rodríguez", grade: "3° Primaria" },
-  { id: "2", name: "Carlos Mendoza", grade: "4° Primaria" },
-  { id: "3", name: "Ana Torres", grade: "2° Primaria" },
+function getInitialsColor(initials: string) {
+  const colors = ["bg-[#3B82F6]", "bg-[#8B5CF6]", "bg-[#059669]", "bg-[#D97706]", "bg-[#DC2626]", "bg-[#0284C7]"]
+  const idx = initials.charCodeAt(0) % colors.length
+  return colors[idx]
+}
+
+function Avatar({ initials, size = "md" }: { initials: string; size?: "sm" | "md" | "lg" }) {
+  const sizeClass = size === "sm" ? "w-6 h-6 text-[10px]" : size === "lg" ? "w-10 h-10 text-sm" : "w-8 h-8 text-xs"
+  return (
+    <div className={`${sizeClass} rounded-full ${getInitialsColor(initials)} flex items-center justify-center shrink-0`}>
+      <span className="text-white font-semibold">{initials}</span>
+    </div>
+  )
+}
+
+// ─── Modal de detalle del evento ──────────────────────────────────────────────
+type EventDetail = typeof initialEvents[0]
+
+const REJECT_REASONS = [
+  "No tengo disponibilidad ese día",
+  "Necesito más tiempo para preparar la reunión",
+  "Otro",
 ]
 
+function EventDetailModal({
+  event,
+  onClose,
+  onUpdate,
+}: {
+  event: EventDetail
+  onClose: () => void
+  onUpdate: (updated: EventDetail) => void
+}) {
+  const typeConfig = getEventTypeConfig(event.type)
+  const [showRejectModal, setShowRejectModal] = useState(false)
+  const [rejectReason, setRejectReason] = useState("")
+  const [rejectCustom, setRejectCustom] = useState("")
+
+  // Simulated current user role: "creador" | "participante_pendiente" | "participante_respondido"
+  const currentUserRole = "creador"
+
+  const handleConfirmAttendance = () => {
+    const updated = {
+      ...event,
+      participants: event.participants.map((p, i) =>
+        i === 0 ? { ...p, status: "confirmado", confirmedAt: new Date().toLocaleDateString("es-PE", { day: "2-digit", month: "short", year: "numeric" }) } : p
+      ),
+    }
+    onUpdate(updated)
+  }
+
+  const handleConfirmReject = () => {
+    const reason = rejectReason === "Otro" ? rejectCustom : rejectReason
+    const updated = {
+      ...event,
+      participants: event.participants.map((p, i) =>
+        i === 0 ? { ...p, status: "rechazado", confirmedAt: new Date().toLocaleDateString("es-PE", { day: "2-digit", month: "short", year: "numeric" }), rejectReason: reason } : p
+      ),
+    }
+    onUpdate(updated)
+    setShowRejectModal(false)
+  }
+
+  return (
+    <>
+      <Dialog open onOpenChange={onClose}>
+        <DialogContent className="sm:max-w-[580px] max-h-[90vh] overflow-y-auto p-0">
+          {/* Header */}
+          <div className="px-6 pt-6 pb-4 border-b border-[#E5E7EB]">
+            <div className="flex items-start justify-between gap-3 mb-3">
+              <div className="flex items-center gap-2 flex-wrap">
+                {typeConfig && (
+                  <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${typeConfig.color.badge}`}>
+                    {typeConfig.label}
+                  </span>
+                )}
+                <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${getStatusStyle(event.status).bg} ${getStatusStyle(event.status).text}`}>
+                  {getStatusStyle(event.status).label}
+                </span>
+              </div>
+            </div>
+            <h2 className="text-lg font-bold text-[#1E3A5F]">{event.title}</h2>
+          </div>
+
+          <div className="px-6 py-4 space-y-5">
+            {/* Info principal */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="p-3 rounded-lg bg-[#F9FAFB] space-y-0.5">
+                <p className="text-[10px] font-semibold text-[#9CA3AF] uppercase tracking-wide">Fecha y hora</p>
+                <p className="text-sm text-[#374151] font-medium">
+                  {event.date.split("-").reverse().join("/")} · {event.time}
+                </p>
+              </div>
+              <div className="p-3 rounded-lg bg-[#F9FAFB] space-y-0.5">
+                <p className="text-[10px] font-semibold text-[#9CA3AF] uppercase tracking-wide">Duración</p>
+                <p className="text-sm text-[#374151] font-medium">{event.duration}</p>
+              </div>
+              <div className="p-3 rounded-lg bg-[#F9FAFB] space-y-0.5">
+                <p className="text-[10px] font-semibold text-[#9CA3AF] uppercase tracking-wide">Modalidad</p>
+                <p className="text-sm text-[#374151] font-medium">{event.modality}</p>
+              </div>
+              <div className="p-3 rounded-lg bg-[#F9FAFB] space-y-0.5">
+                <p className="text-[10px] font-semibold text-[#9CA3AF] uppercase tracking-wide">
+                  {event.location?.includes("http") ? "Enlace" : "Ubicación"}
+                </p>
+                <p className="text-sm text-[#374151] font-medium">{event.location}</p>
+              </div>
+            </div>
+
+            {/* Estudiante */}
+            <div>
+              <p className="text-[10px] font-semibold text-[#9CA3AF] uppercase tracking-wide mb-2">Estudiante</p>
+              <div className="flex items-center gap-2 p-2.5 rounded-lg bg-[#EFF6FF] border border-[#BFDBFE]">
+                <Avatar initials={event.student.split(" ").map(n => n[0]).join("").slice(0, 2)} size="sm" />
+                <span className="text-sm font-medium text-[#1E3A5F]">{event.student}</span>
+              </div>
+            </div>
+
+            {/* Participantes */}
+            <div>
+              <p className="text-[10px] font-semibold text-[#9CA3AF] uppercase tracking-wide mb-2">Participantes</p>
+              <div className="space-y-2">
+                {event.participants.map((p: any, idx: number) => {
+                  const st = getStatusStyle(p.status)
+                  return (
+                    <div key={idx} className="flex items-center gap-3 p-3 rounded-lg border border-[#E5E7EB] bg-white">
+                      <Avatar initials={p.name.split(" ").map((n: string) => n[0]).join("").slice(0, 2)} size="sm" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-[#374151]">{p.name}</p>
+                        <p className="text-xs text-[#9CA3AF]">{p.role}</p>
+                        {p.confirmedAt && (
+                          <p className="text-[11px] text-[#9CA3AF]">
+                            {p.status === "rechazado" ? "Rechazó el" : "Confirmó el"} {p.confirmedAt}
+                            {p.rejectReason && ` · ${p.rejectReason}`}
+                          </p>
+                        )}
+                      </div>
+                      <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full ${st.bg} ${st.text}`}>
+                        {st.label}
+                      </span>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* Notas */}
+            {event.notes && (
+              <div>
+                <p className="text-[10px] font-semibold text-[#9CA3AF] uppercase tracking-wide mb-2">Notas</p>
+                <p className="text-sm text-[#374151] leading-relaxed p-3 rounded-lg bg-[#F9FAFB]">{event.notes}</p>
+              </div>
+            )}
+          </div>
+
+          {/* Footer acciones */}
+          <div className="px-6 py-4 border-t border-[#E5E7EB] flex items-center justify-between gap-2">
+            {currentUserRole === "creador" ? (
+              <div className="flex gap-2 w-full justify-end">
+                <Button variant="outline" size="sm" className="text-[#DC2626] border-[#FECACA] hover:bg-[#FEF2F2] text-xs">
+                  Cancelar evento
+                </Button>
+                <Button size="sm" className="bg-[#1E3A5F] hover:bg-[#2D4A6F] text-white text-xs">
+                  Editar evento
+                </Button>
+              </div>
+            ) : (
+              <div className="flex gap-2 w-full justify-end">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowRejectModal(true)}
+                  className="text-[#DC2626] border-[#FECACA] hover:bg-[#FEF2F2] text-xs"
+                >
+                  Rechazar
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={handleConfirmAttendance}
+                  className="bg-[#059669] hover:bg-[#047857] text-white text-xs gap-1.5"
+                >
+                  <Check size={13} />
+                  Confirmar asistencia
+                </Button>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Sub-modal rechazo */}
+      <Dialog open={showRejectModal} onOpenChange={setShowRejectModal}>
+        <DialogContent className="sm:max-w-[380px]">
+          <DialogHeader>
+            <DialogTitle className="text-base font-semibold text-[#1E3A5F]">
+              &iquest;Por qu&eacute; rechazas la invitaci&oacute;n?
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 pt-1">
+            <Select value={rejectReason} onValueChange={setRejectReason}>
+              <SelectTrigger className="border-[#E5E7EB]">
+                <SelectValue placeholder="Seleccionar motivo" />
+              </SelectTrigger>
+              <SelectContent>
+                {REJECT_REASONS.map(r => (
+                  <SelectItem key={r} value={r}>{r}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {rejectReason === "Otro" && (
+              <Textarea
+                placeholder="Describe el motivo..."
+                value={rejectCustom}
+                onChange={e => setRejectCustom(e.target.value)}
+                className="border-[#E5E7EB] resize-none h-20 text-sm"
+              />
+            )}
+            <div className="flex justify-end gap-2 pt-1">
+              <Button variant="outline" size="sm" onClick={() => setShowRejectModal(false)} className="border-[#E5E7EB] text-xs">
+                Cancelar
+              </Button>
+              <Button
+                size="sm"
+                onClick={handleConfirmReject}
+                disabled={!rejectReason || (rejectReason === "Otro" && !rejectCustom.trim())}
+                className="bg-[#DC2626] hover:bg-[#B91C1C] text-white text-xs"
+              >
+                Confirmar rechazo
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
+  )
+}
+
+// ─── Página principal ─────────────────────────────────────────────────────────
 export default function EventosPage() {
-  const [currentWeek, setCurrentWeek] = useState(0)
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [events, setEvents] = useState(initialEvents)
+  const [currentWeek, setCurrentWeek]     = useState(0)
+  const [isDialogOpen, setIsDialogOpen]   = useState(false)
+  const [selectedEvent, setSelectedEvent] = useState<EventDetail | null>(null)
+  const [events, setEvents]               = useState(initialEvents)
+  const [mounted, setMounted]             = useState(false)
+  const [saaneeSearch, setSaaneeSearch]   = useState("")
+
   const [newEvent, setNewEvent] = useState({
-    title: "",
-    type: "",
-    date: "",
-    time: "",
-    duration: "30",
-    location: "",
-    student: "",
+    title:       "",
+    type:        "",
+    date:        "",
+    time:        "",
+    duration:    "30",
+    modality:    "Presencial",
+    location:    "",
+    studentId:   "",
+    saaneeId:    "",
     description: "",
   })
 
-  // Helper to format duration
+  useEffect(() => { setMounted(true) }, [])
+
+  const selectedStudent  = students.find(s => s.id === newEvent.studentId) ?? null
+  const selectedSaanee   = saaneeStaff.find(s => s.id === newEvent.saaneeId) ?? null
+  const filteredSaanee   = saaneeSearch
+    ? saaneeStaff.filter(s => s.name.toLowerCase().includes(saaneeSearch.toLowerCase()) || s.specialty.toLowerCase().includes(saaneeSearch.toLowerCase()))
+    : saaneeStaff
+  const [saaneeOpen, setSaaneeOpen] = useState(false)
+
+  const noFamilyWarning =
+    newEvent.type === "reunion_padres" &&
+    selectedStudent &&
+    selectedStudent.family.length === 0
+
+  const isFormValid =
+    newEvent.title.trim() &&
+    newEvent.type &&
+    newEvent.date &&
+    newEvent.time &&
+    newEvent.studentId &&
+    (newEvent.type !== "solicitud_saanee" || newEvent.saaneeId) &&
+    !noFamilyWarning
+
   const formatDuration = (minutes: string) => {
     const min = parseInt(minutes)
     if (min < 60) return `${min} min`
@@ -143,7 +445,6 @@ export default function EventosPage() {
     return `${min / 60} hrs`
   }
 
-  // Helper to format time from 24h to 12h
   const formatTime = (time: string) => {
     if (!time) return ""
     const [hours, minutes] = time.split(":")
@@ -153,71 +454,61 @@ export default function EventosPage() {
     return `${hour12}:${minutes} ${ampm}`
   }
 
-  // Handle create event
   const handleCreateEvent = () => {
-    if (!newEvent.title || !newEvent.type || !newEvent.date || !newEvent.time) {
-      return // Basic validation
-    }
+    if (!isFormValid) return
+    const student = students.find(s => s.id === newEvent.studentId)!
+    const saanee  = saaneeStaff.find(s => s.id === newEvent.saaneeId)
 
-    const studentName = newEvent.student 
-      ? students.find(s => s.id === newEvent.student)?.name || null
-      : null
+    const participants =
+      newEvent.type === "solicitud_saanee" && saanee
+        ? [{ id: saanee.id, name: saanee.name, role: saanee.specialty, status: "pendiente", confirmedAt: null }]
+        : newEvent.type === "reunion_padres"
+          ? student.family.map(f => ({ id: f.id, name: f.name, role: f.relation, status: "pendiente", confirmedAt: null }))
+          : []
 
-    const event = {
-      id: Date.now().toString(),
-      title: newEvent.title,
-      date: newEvent.date,
-      time: formatTime(newEvent.time),
-      duration: formatDuration(newEvent.duration),
-      type: newEvent.type,
-      location: newEvent.location || "Por definir",
-      student: studentName,
-      attendees: [],
-      status: "pendiente",
+    const event: EventDetail = {
+      id:           Date.now().toString(),
+      title:        newEvent.title,
+      date:         newEvent.date,
+      time:         formatTime(newEvent.time),
+      duration:     formatDuration(newEvent.duration),
+      type:         newEvent.type,
+      modality:     newEvent.modality,
+      location:     newEvent.location || "Por definir",
+      student:      student.name,
+      studentId:    student.id,
+      notes:        newEvent.description,
+      participants,
+      createdBy:    "Prof. María Castro",
+      status:       "pendiente",
     }
 
     setEvents([event, ...events])
     setIsDialogOpen(false)
-    setNewEvent({
-      title: "",
-      type: "",
-      date: "",
-      time: "",
-      duration: "30",
-      location: "",
-      student: "",
-      description: "",
-    })
+    setNewEvent({ title: "", type: "", date: "", time: "", duration: "30", modality: "Presencial", location: "", studentId: "", saaneeId: "", description: "" })
+    setSaaneeSearch("")
   }
 
-  // Track if component is mounted (for hydration)
-  const [mounted, setMounted] = useState(false)
-  useEffect(() => {
-    setMounted(true)
-  }, [])
+  const handleUpdateEvent = (updated: EventDetail) => {
+    setEvents(prev => prev.map(e => e.id === updated.id ? updated : e))
+    setSelectedEvent(updated)
+  }
 
-  // Get current week dates
+  // Week calendar
   const today = new Date()
   const startOfWeek = new Date(today)
   startOfWeek.setDate(today.getDate() - today.getDay() + 1 + currentWeek * 7)
-  
   const weekDays = Array.from({ length: 5 }, (_, i) => {
     const day = new Date(startOfWeek)
     day.setDate(startOfWeek.getDate() + i)
     return day
   })
-
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString("es-PE", { weekday: "short", day: "numeric" })
-  }
-
+  const formatDate = (date: Date) =>
+    date.toLocaleDateString("es-PE", { weekday: "short", day: "numeric" })
   const isToday = (date: Date) => {
-    if (!mounted) return false // Prevent hydration mismatch
-    const today = new Date()
-    return date.toDateString() === today.toDateString()
+    if (!mounted) return false
+    return date.toDateString() === new Date().toDateString()
   }
-
-  // Helper to convert time string to minutes for sorting
   const timeToMinutes = (time: string) => {
     if (!time) return 0
     const match = time.match(/(\d+):(\d+)\s*(AM|PM)?/i)
@@ -229,11 +520,8 @@ export default function EventosPage() {
     if (period === "AM" && hours === 12) hours = 0
     return hours * 60 + minutes
   }
-
-  // Sort events by time
-  const sortEventsByTime = (eventsList: typeof events) => {
-    return [...eventsList].sort((a, b) => timeToMinutes(a.time) - timeToMinutes(b.time))
-  }
+  const sortByTime = (list: typeof events) =>
+    [...list].sort((a, b) => timeToMinutes(a.time) - timeToMinutes(b.time))
 
   return (
     <div className="p-6 space-y-6">
@@ -241,101 +529,70 @@ export default function EventosPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-[#1E3A5F]">Eventos</h1>
-          <p className="text-sm text-[#6B7280]">
-            Gestiona reuniones, evaluaciones y actividades programadas.
-          </p>
+          <p className="text-sm text-[#6B7280]">Gestiona reuniones y solicitudes de apoyo SAANEE.</p>
         </div>
-        <Button 
-          className="gap-2 bg-[#1E3A5F] hover:bg-[#2D4A6F] text-white"
-          onClick={() => setIsDialogOpen(true)}
-        >
+        <Button className="gap-2 bg-[#1E3A5F] hover:bg-[#2D4A6F] text-white" onClick={() => setIsDialogOpen(true)}>
           <Plus size={16} />
           Nuevo evento
         </Button>
       </div>
 
-      {/* Week navigation */}
+      {/* Week calendar */}
       <Card className="border-[#E5E7EB]">
         <CardHeader className="pb-3 flex flex-row items-center justify-between">
           <div className="flex items-center gap-3">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8"
-              onClick={() => setCurrentWeek(currentWeek - 1)}
-            >
+            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setCurrentWeek(w => w - 1)}>
               <ChevronLeft size={16} />
             </Button>
             <span className="text-sm font-medium text-[#1E3A5F]">
               {weekDays[0].toLocaleDateString("es-PE", { month: "long", year: "numeric" })}
             </span>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8"
-              onClick={() => setCurrentWeek(currentWeek + 1)}
-            >
+            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setCurrentWeek(w => w + 1)}>
               <ChevronRight size={16} />
             </Button>
             {currentWeek !== 0 && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-xs text-[#3B82F6]"
-                onClick={() => setCurrentWeek(0)}
-              >
+              <Button variant="ghost" size="sm" className="text-xs text-[#3B82F6]" onClick={() => setCurrentWeek(0)}>
                 Hoy
               </Button>
             )}
           </div>
         </CardHeader>
         <CardContent>
-          {/* Week days header */}
           <div className="grid grid-cols-5 gap-2 mb-4">
             {weekDays.map((day, idx) => (
               <div
                 key={idx}
-                className={`text-center p-2 rounded-lg ${
-                  isToday(day)
-                    ? "bg-[#1E3A5F] text-white"
-                    : "bg-[#F9FAFB] text-[#374151]"
-                }`}
+                className={`text-center p-2 rounded-lg ${isToday(day) ? "bg-[#1E3A5F] text-white" : "bg-[#F9FAFB] text-[#374151]"}`}
               >
                 <p className="text-xs font-medium capitalize">{formatDate(day)}</p>
               </div>
             ))}
           </div>
-
-          {/* Events grid */}
-          <div className="grid grid-cols-5 gap-2 min-h-[200px]">
+          <div className="grid grid-cols-5 gap-2 min-h-[160px]">
             {weekDays.map((day, idx) => {
-              const dayEvents = sortEventsByTime(
-                events.filter((e) => e.date === day.toISOString().split("T")[0])
-              )
+              const dayEvents = sortByTime(events.filter(e => e.date === day.toISOString().split("T")[0]))
               return (
-                <div key={idx} className="space-y-2">
-                  {dayEvents.length > 0 ? (
-                    dayEvents.map((event) => {
-                      const typeStyle = getEventTypeStyle(event.type)
-                      return (
-                        <div
-                          key={event.id}
-                          className={`p-2 rounded-lg border-l-2 ${typeStyle.bg} ${typeStyle.border} cursor-pointer hover:opacity-80 transition-opacity`}
-                        >
-                          <p className="text-[11px] font-medium text-[#1E3A5F] line-clamp-2">
-                            {event.title}
-                          </p>
-                          <p className="text-[10px] text-[#6B7280] mt-1">
-                            {event.time}
-                          </p>
-                        </div>
-                      )
-                    })
-                  ) : (
-                    <div className="h-full flex items-center justify-center">
-                      <p className="text-[10px] text-[#9CA3AF]">Sin eventos</p>
-                    </div>
-                  )}
+                <div key={idx} className="space-y-1.5">
+                  {dayEvents.length > 0
+                    ? dayEvents.map(ev => {
+                        const tc = getEventTypeConfig(ev.type)
+                        return (
+                          <div
+                            key={ev.id}
+                            onClick={() => setSelectedEvent(ev)}
+                            className="p-2 rounded-lg border-l-2 cursor-pointer hover:opacity-80 transition-opacity"
+                            style={{ backgroundColor: tc?.color.bg ?? "#F9FAFB", borderColor: tc?.color.border ?? "#E5E7EB" }}
+                          >
+                            <p className="text-[11px] font-medium text-[#1E3A5F] line-clamp-2">{ev.title}</p>
+                            <p className="text-[10px] text-[#6B7280] mt-0.5">{ev.time}</p>
+                          </div>
+                        )
+                      })
+                    : (
+                      <div className="h-full flex items-center justify-center">
+                        <p className="text-[10px] text-[#9CA3AF]">Sin eventos</p>
+                      </div>
+                    )}
                 </div>
               )
             })}
@@ -343,8 +600,9 @@ export default function EventosPage() {
         </CardContent>
       </Card>
 
-      {/* Upcoming events list */}
+      {/* Lists */}
       <div className="grid lg:grid-cols-2 gap-6">
+        {/* Upcoming */}
         <Card className="border-[#E5E7EB]">
           <CardHeader className="pb-3">
             <CardTitle className="text-base font-semibold text-[#1E3A5F] flex items-center gap-2">
@@ -353,40 +611,39 @@ export default function EventosPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            {sortEventsByTime(events).map((event) => {
-              const typeStyle = getEventTypeStyle(event.type)
-              const statusStyle = getStatusStyle(event.status)
+            {sortByTime(events).map(ev => {
+              const tc = getEventTypeConfig(ev.type)
+              const st = getStatusStyle(ev.status)
               return (
                 <div
-                  key={event.id}
-                  className={`p-3 rounded-lg border ${typeStyle.border} ${typeStyle.bg} bg-opacity-50`}
+                  key={ev.id}
+                  onClick={() => setSelectedEvent(ev)}
+                  className="p-3 rounded-lg border cursor-pointer hover:shadow-sm transition-shadow"
+                  style={{ backgroundColor: tc?.color.bg ?? "#F9FAFB", borderColor: tc?.color.border ?? "#E5E7EB" }}
                 >
                   <div className="flex items-start justify-between gap-2 mb-2">
-                    <Badge
-                      variant="outline"
-                      className={`text-[10px] font-semibold ${typeStyle.text} border-current`}
-                    >
-                      {typeStyle.label}
-                    </Badge>
-                    <Badge className={`text-[10px] ${statusStyle.bg} ${statusStyle.text} border-0`}>
-                      {event.status}
-                    </Badge>
+                    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${tc?.color.badge ?? ""}`}>
+                      {tc?.short ?? "Otro"}
+                    </span>
+                    <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${st.bg} ${st.text}`}>
+                      {st.label}
+                    </span>
                   </div>
-                  <p className="text-sm font-medium text-[#1E3A5F] mb-2">{event.title}</p>
+                  <p className="text-sm font-medium text-[#1E3A5F] mb-2">{ev.title}</p>
                   <div className="flex flex-wrap gap-3 text-[11px] text-[#6B7280]">
                     <span className="flex items-center gap-1">
                       <Clock size={12} />
-                      {event.date.split("-").reverse().join("/")} · {event.time}
+                      {ev.date.split("-").reverse().join("/")} · {ev.time}
                     </span>
                     <span className="flex items-center gap-1">
-                      {event.location.includes("Virtual") ? <Video size={12} /> : <MapPin size={12} />}
-                      {event.location}
+                      {ev.location?.includes("Virtual") ? <Video size={12} /> : <MapPin size={12} />}
+                      {ev.location}
                     </span>
                   </div>
-                  {event.student && (
-                    <div className="mt-2 flex items-center gap-1 text-[11px] text-[#3B82F6]">
+                  {ev.student && (
+                    <div className="mt-2 flex items-center gap-1 text-[11px] text-[#2563EB]">
                       <User size={12} />
-                      {event.student}
+                      {ev.student}
                     </div>
                   )}
                 </div>
@@ -395,7 +652,7 @@ export default function EventosPage() {
           </CardContent>
         </Card>
 
-        {/* Past events */}
+        {/* Past */}
         <Card className="border-[#E5E7EB]">
           <CardHeader className="pb-3">
             <CardTitle className="text-base font-semibold text-[#1E3A5F] flex items-center gap-2">
@@ -404,25 +661,19 @@ export default function EventosPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            {pastEvents.map((event) => {
-              const typeStyle = getEventTypeStyle(event.type)
+            {pastEvents.map(ev => {
+              const tc = getEventTypeConfig(ev.type)
               return (
-                <div
-                  key={event.id}
-                  className="p-3 rounded-lg border border-[#E5E7EB] bg-[#F9FAFB]"
-                >
+                <div key={ev.id} className="p-3 rounded-lg border border-[#E5E7EB] bg-[#F9FAFB]">
                   <div className="flex items-start justify-between gap-2 mb-2">
-                    <Badge
-                      variant="outline"
-                      className={`text-[10px] font-semibold text-[#6B7280] border-[#D1D5DB]`}
-                    >
-                      {typeStyle.label}
-                    </Badge>
+                    <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-[#F3F4F6] text-[#6B7280]">
+                      {tc?.short ?? "Otro"}
+                    </span>
                     <span className="text-[10px] text-[#9CA3AF]">Completado</span>
                   </div>
-                  <p className="text-sm font-medium text-[#374151] mb-1">{event.title}</p>
+                  <p className="text-sm font-medium text-[#374151] mb-1">{ev.title}</p>
                   <p className="text-[11px] text-[#9CA3AF]">
-                    {event.date.split("-").reverse().join("/")} · {event.time}
+                    {ev.date.split("-").reverse().join("/")} · {ev.time}
                   </p>
                 </div>
               )
@@ -434,95 +685,210 @@ export default function EventosPage() {
         </Card>
       </div>
 
-      {/* New Event Dialog */}
+      {/* ─── Modal detalle ─────────────────────────────────────────────────────── */}
+      {selectedEvent && (
+        <EventDetailModal
+          event={selectedEvent}
+          onClose={() => setSelectedEvent(null)}
+          onUpdate={handleUpdateEvent}
+        />
+      )}
+
+      {/* ─── Modal nuevo evento ────────────────────────────────────────────────── */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="sm:max-w-[520px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-lg font-semibold text-[#1E3A5F]">
-              Nuevo evento
-            </DialogTitle>
+            <DialogTitle className="text-lg font-semibold text-[#1E3A5F]">Nuevo evento</DialogTitle>
           </DialogHeader>
-          
+
           <div className="space-y-4 pt-2">
-            {/* Title */}
+            {/* Tipo de evento — chips */}
+            <div className="space-y-2">
+              <Label className="text-sm text-[#374151] font-medium">
+                Tipo de evento <span className="text-[#DC2626]">*</span>
+              </Label>
+              <div className="flex gap-2 flex-wrap">
+                {EVENT_TYPES.map(t => {
+                  const selected = newEvent.type === t.id
+                  return (
+                    <button
+                      key={t.id}
+                      type="button"
+                      onClick={() => setNewEvent(f => ({ ...f, type: t.id, saaneeId: "" }))}
+                      className="text-sm px-4 py-2 rounded-full border transition-all font-medium"
+                      style={selected ? {
+                        backgroundColor: t.color.bg,
+                        borderColor: t.color.border,
+                        color: t.color.text,
+                        boxShadow: `0 0 0 2px ${t.color.border}`,
+                      } : {
+                        backgroundColor: "white",
+                        borderColor: "#E5E7EB",
+                        color: "#6B7280",
+                      }}
+                    >
+                      {t.label}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* Título */}
             <div className="space-y-1.5">
-              <Label htmlFor="title" className="text-sm text-[#374151]">Título</Label>
+              <Label htmlFor="title" className="text-sm text-[#374151]">
+                Título <span className="text-[#DC2626]">*</span>
+              </Label>
               <Input
                 id="title"
-                placeholder="Ej: Reunión con familia"
+                placeholder="Ej: Reunión con familia Rodríguez"
                 value={newEvent.title}
-                onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })}
+                onChange={e => setNewEvent(f => ({ ...f, title: e.target.value }))}
                 className="border-[#E5E7EB]"
               />
             </div>
 
-            {/* Type and Student */}
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <Label className="text-sm text-[#374151]">Tipo de evento</Label>
-                <Select
-                  value={newEvent.type}
-                  onValueChange={(value) => setNewEvent({ ...newEvent, type: value })}
-                >
-                  <SelectTrigger className="border-[#E5E7EB]">
-                    <SelectValue placeholder="Seleccionar" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="reunion_familiar">Reunión familiar</SelectItem>
-                    <SelectItem value="evaluacion">Evaluación</SelectItem>
-                    <SelectItem value="capacitacion">Capacitación</SelectItem>
-                    <SelectItem value="observacion">Observación de aula</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-sm text-[#374151]">Estudiante (opcional)</Label>
-                <Select
-                  value={newEvent.student}
-                  onValueChange={(value) => setNewEvent({ ...newEvent, student: value })}
-                >
-                  <SelectTrigger className="border-[#E5E7EB]">
-                    <SelectValue placeholder="Seleccionar" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {students.map((s) => (
-                      <SelectItem key={s.id} value={s.id}>
-                        {s.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+            {/* Estudiante — obligatorio */}
+            <div className="space-y-1.5">
+              <Label className="text-sm text-[#374151]">
+                Estudiante <span className="text-[#DC2626]">*</span>
+              </Label>
+              <Select value={newEvent.studentId} onValueChange={v => setNewEvent(f => ({ ...f, studentId: v }))}>
+                <SelectTrigger className="border-[#E5E7EB]">
+                  <SelectValue placeholder="Seleccionar estudiante" />
+                </SelectTrigger>
+                <SelectContent>
+                  {students.map(s => (
+                    <SelectItem key={s.id} value={s.id}>
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium">{s.name}</span>
+                        <span className="text-[#9CA3AF] text-xs">· {s.grade}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
-            {/* Date, Time, Duration */}
+            {/* Campos dinámicos por tipo */}
+            {newEvent.type === "solicitud_saanee" && (
+              <div className="space-y-1.5">
+                <Label className="text-sm text-[#374151]">
+                  Profesional SAANEE <span className="text-[#DC2626]">*</span>
+                </Label>
+                <div className="relative">
+                  <div
+                    className="flex items-center gap-2 border border-[#E5E7EB] rounded-md px-3 h-9 cursor-pointer bg-white"
+                    onClick={() => setSaaneeOpen(o => !o)}
+                  >
+                    <Search size={14} className="text-[#9CA3AF] shrink-0" />
+                    {selectedSaanee ? (
+                      <span className="text-sm text-[#374151]">{selectedSaanee.name} — {selectedSaanee.specialty}</span>
+                    ) : (
+                      <span className="text-sm text-[#9CA3AF]">Buscar profesional...</span>
+                    )}
+                  </div>
+                  {saaneeOpen && (
+                    <div className="absolute z-50 top-10 left-0 right-0 bg-white border border-[#E5E7EB] rounded-md shadow-lg">
+                      <div className="p-2 border-b border-[#E5E7EB]">
+                        <Input
+                          placeholder="Buscar por nombre o especialidad"
+                          value={saaneeSearch}
+                          onChange={e => setSaaneeSearch(e.target.value)}
+                          className="border-[#E5E7EB] h-8 text-sm"
+                          autoFocus
+                        />
+                      </div>
+                      <div className="max-h-48 overflow-y-auto">
+                        {filteredSaanee.length === 0 ? (
+                          <p className="text-sm text-[#9CA3AF] text-center py-4">Sin resultados</p>
+                        ) : filteredSaanee.map(s => (
+                          <button
+                            key={s.id}
+                            type="button"
+                            onClick={() => {
+                              setNewEvent(f => ({ ...f, saaneeId: s.id }))
+                              setSaaneeOpen(false)
+                              setSaaneeSearch("")
+                            }}
+                            className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-[#F9FAFB] transition-colors text-left"
+                          >
+                            <div className={`w-8 h-8 rounded-full ${getInitialsColor(s.initials)} flex items-center justify-center shrink-0`}>
+                              <span className="text-white text-xs font-semibold">{s.initials}</span>
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium text-[#374151]">{s.name}</p>
+                              <p className="text-xs text-[#9CA3AF]">{s.specialty}</p>
+                            </div>
+                            {newEvent.saaneeId === s.id && <Check size={14} className="ml-auto text-[#059669]" />}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {newEvent.type === "reunion_padres" && newEvent.studentId && (
+              <div className="space-y-2">
+                <Label className="text-sm text-[#374151]">Familiares que ser&aacute;n invitados</Label>
+                {noFamilyWarning ? (
+                  <div className="flex items-start gap-2.5 p-3 rounded-lg bg-[#FEF3C7] border border-[#FDE68A]">
+                    <AlertCircle size={16} className="text-[#D97706] mt-0.5 shrink-0" />
+                    <p className="text-sm text-[#92400E]">
+                      Este estudiante no tiene familiares registrados. Contacta al administrador para registrarlos.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {selectedStudent!.family.map(f => (
+                      <div key={f.id} className="flex items-center gap-3 p-2.5 rounded-lg bg-[#F9FAFB] border border-[#E5E7EB]">
+                        <div className={`w-8 h-8 rounded-full ${getInitialsColor(f.name.split(" ").map(n => n[0]).join("").slice(0, 2))} flex items-center justify-center shrink-0`}>
+                          <span className="text-white text-xs font-semibold">
+                            {f.name.split(" ").map(n => n[0]).join("").slice(0, 2)}
+                          </span>
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-[#374151]">{f.name}</p>
+                          <p className="text-xs text-[#9CA3AF]">({f.relation})</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Fecha, Hora, Duración */}
             <div className="grid grid-cols-3 gap-3">
               <div className="space-y-1.5">
-                <Label htmlFor="date" className="text-sm text-[#374151]">Fecha</Label>
+                <Label htmlFor="date" className="text-sm text-[#374151]">
+                  Fecha <span className="text-[#DC2626]">*</span>
+                </Label>
                 <Input
                   id="date"
                   type="date"
                   value={newEvent.date}
-                  onChange={(e) => setNewEvent({ ...newEvent, date: e.target.value })}
+                  onChange={e => setNewEvent(f => ({ ...f, date: e.target.value }))}
                   className="border-[#E5E7EB]"
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="time" className="text-sm text-[#374151]">Hora</Label>
+                <Label htmlFor="time" className="text-sm text-[#374151]">
+                  Hora <span className="text-[#DC2626]">*</span>
+                </Label>
                 <Input
                   id="time"
                   type="time"
                   value={newEvent.time}
-                  onChange={(e) => setNewEvent({ ...newEvent, time: e.target.value })}
+                  onChange={e => setNewEvent(f => ({ ...f, time: e.target.value }))}
                   className="border-[#E5E7EB]"
                 />
               </div>
               <div className="space-y-1.5">
                 <Label className="text-sm text-[#374151]">Duración</Label>
-                <Select
-                  value={newEvent.duration}
-                  onValueChange={(value) => setNewEvent({ ...newEvent, duration: value })}
-                >
+                <Select value={newEvent.duration} onValueChange={v => setNewEvent(f => ({ ...f, duration: v }))}>
                   <SelectTrigger className="border-[#E5E7EB]">
                     <SelectValue />
                   </SelectTrigger>
@@ -538,42 +904,52 @@ export default function EventosPage() {
               </div>
             </div>
 
-            {/* Location */}
-            <div className="space-y-1.5">
-              <Label htmlFor="location" className="text-sm text-[#374151]">Ubicación</Label>
-              <Input
-                id="location"
-                placeholder="Ej: Sala de reuniones, Virtual - Zoom"
-                value={newEvent.location}
-                onChange={(e) => setNewEvent({ ...newEvent, location: e.target.value })}
-                className="border-[#E5E7EB]"
-              />
+            {/* Modalidad y Ubicación */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label className="text-sm text-[#374151]">Modalidad</Label>
+                <Select value={newEvent.modality} onValueChange={v => setNewEvent(f => ({ ...f, modality: v }))}>
+                  <SelectTrigger className="border-[#E5E7EB]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Presencial">Presencial</SelectItem>
+                    <SelectItem value="Virtual">Virtual</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="location" className="text-sm text-[#374151]">Ubicación / Enlace</Label>
+                <Input
+                  id="location"
+                  placeholder={newEvent.modality === "Virtual" ? "https://meet.google.com/..." : "Sala de reuniones"}
+                  value={newEvent.location}
+                  onChange={e => setNewEvent(f => ({ ...f, location: e.target.value }))}
+                  className="border-[#E5E7EB]"
+                />
+              </div>
             </div>
 
-            {/* Description */}
+            {/* Notas */}
             <div className="space-y-1.5">
               <Label htmlFor="description" className="text-sm text-[#374151]">Notas (opcional)</Label>
               <Textarea
                 id="description"
                 placeholder="Detalles adicionales del evento..."
                 value={newEvent.description}
-                onChange={(e) => setNewEvent({ ...newEvent, description: e.target.value })}
+                onChange={e => setNewEvent(f => ({ ...f, description: e.target.value }))}
                 className="border-[#E5E7EB] resize-none h-20"
               />
             </div>
 
             {/* Actions */}
             <div className="flex justify-end gap-2 pt-2">
-              <Button
-                variant="outline"
-                onClick={() => setIsDialogOpen(false)}
-                className="border-[#E5E7EB] text-[#374151]"
-              >
+              <Button variant="outline" onClick={() => setIsDialogOpen(false)} className="border-[#E5E7EB] text-[#374151]">
                 Cancelar
               </Button>
               <Button
                 className="bg-[#1E3A5F] hover:bg-[#2D4A6F] text-white"
-                disabled={!newEvent.title || !newEvent.type || !newEvent.date || !newEvent.time}
+                disabled={!isFormValid}
                 onClick={handleCreateEvent}
               >
                 Crear evento
