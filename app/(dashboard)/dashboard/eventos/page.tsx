@@ -100,7 +100,7 @@ const initialEvents = [
   {
     id: "1",
     title: "Reunión con familia Rodríguez",
-    date: "2025-05-10",
+    date: "2026-05-07",
     time: "10:00 AM",
     duration: "45 min",
     type: "reunion_padres",
@@ -121,7 +121,7 @@ const initialEvents = [
   {
     id: "2",
     title: "Solicitud apoyo SAANEE — Carlos",
-    date: "2025-05-12",
+    date: "2026-05-08",
     time: "11:30 AM",
     duration: "30 min",
     type: "solicitud_saanee",
@@ -141,7 +141,7 @@ const initialEvents = [
   {
     id: "3",
     title: "Evaluación auditiva — Sofía Rodríguez",
-    date: "2025-05-14",
+    date: "2026-05-06",
     time: "9:00 AM",
     duration: "60 min",
     type: "solicitud_saanee",
@@ -161,7 +161,7 @@ const initialEvents = [
   {
     id: "4",
     title: "Reunión de seguimiento — Carlos Mendoza",
-    date: "2025-05-16",
+    date: "2026-05-09",
     time: "3:00 PM",
     duration: "45 min",
     type: "reunion_padres",
@@ -182,7 +182,7 @@ const initialEvents = [
   {
     id: "5",
     title: "Taller de estrategias LSP — Ana Torres",
-    date: "2025-05-08",
+    date: "2026-05-05",
     time: "2:00 PM",
     duration: "60 min",
     type: "solicitud_saanee",
@@ -202,7 +202,7 @@ const initialEvents = [
   {
     id: "6",
     title: "Reunión bimestral — Familia Torres",
-    date: "2025-05-06",
+    date: "2026-05-04",
     time: "11:00 AM",
     duration: "30 min",
     type: "reunion_padres",
@@ -664,6 +664,7 @@ export default function EventosPage() {
       participants,
       createdBy:    "Prof. María Castro",
       status:       "pendiente",
+      viewerRole:   "docente" as ViewerRole,
     }
 
     setEvents([event, ...events])
