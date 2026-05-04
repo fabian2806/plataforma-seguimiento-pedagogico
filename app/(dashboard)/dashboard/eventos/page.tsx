@@ -83,11 +83,17 @@ const saaneeStaff = [
 ]
 
 // "viewer" simulates who is currently looking at the app:
-// "docente" = Prof. María Castro (creator), "saanee" = Roberto Quispe, "padre" = Elena Pérez
+// "docente" = Prof. María Castro (creator), "saanee" = Roberto Quispe,
+// "padre" = Elena Pérez (tiene eventos), "padre_vacio" = Rosa Mendoza (sin eventos)
 // In a real app this would come from auth context.
-type ViewerRole = "docente" | "saanee" | "padre"
+type ViewerRole = "docente" | "saanee" | "padre" | "padre_vacio"
 
-const DEMO_VIEWER: ViewerRole = "docente"
+const DEMO_ROLES: { id: ViewerRole; label: string; subtitle: string }[] = [
+  { id: "docente",     label: "Docente",             subtitle: "Prof. María Castro" },
+  { id: "saanee",      label: "Especialista SAANEE",  subtitle: "Roberto Quispe" },
+  { id: "padre",       label: "Familiar (con eventos)", subtitle: "Elena Pérez" },
+  { id: "padre_vacio", label: "Familiar (sin eventos)", subtitle: "Rosa Mendoza" },
+]
 
 const initialEvents = [
   // ── Evento 1: Reunión padres — vista docente, una madre confirmó, padre pendiente
@@ -273,10 +279,12 @@ const REJECT_REASONS = [
 
 function EventDetailModal({
   event,
+  viewerRole,
   onClose,
   onUpdate,
 }: {
   event: EventDetail
+  viewerRole: ViewerRole
   onClose: () => void
   onUpdate: (updated: EventDetail) => void
 }) {
@@ -285,11 +293,10 @@ function EventDetailModal({
   const [rejectReason, setRejectReason] = useState("")
   const [rejectCustom, setRejectCustom] = useState("")
 
-  // viewerRole comes from the event itself (mock), in production from auth context
-  const viewerRole: ViewerRole = (event as any).viewerRole ?? "docente"
-
   // For participant views, find the current viewer's participant entry
-  const viewerParticipantId = viewerRole === "saanee" ? "s1" : viewerRole === "padre" ? "f3" : null
+  const viewerParticipantId = viewerRole === "saanee" ? "s1"
+    : (viewerRole === "padre" || viewerRole === "padre_vacio") ? "f3"
+    : null
   const viewerParticipant = viewerParticipantId
     ? event.participants.find((p: any) => p.id === viewerParticipantId) ?? event.participants[0]
     : null
@@ -456,7 +463,7 @@ function EventDetailModal({
 
           {/* Footer acciones */}
           <div className="px-6 py-4 border-t border-[#E5E7EB]">
-            {viewerRole === "docente" ? (
+            {(viewerRole === "docente") ? (
               /* Docente: editar / cancelar */
               <div className="flex gap-2 justify-end">
                 <Button variant="outline" size="sm" className="text-[#DC2626] border-[#FECACA] hover:bg-[#FEF2F2] text-xs">
@@ -568,6 +575,14 @@ export default function EventosPage() {
   const [events, setEvents]               = useState(initialEvents)
   const [mounted, setMounted]             = useState(false)
   const [saaneeSearch, setSaaneeSearch]   = useState("")
+  const [demoViewer, setDemoViewer]       = useState<ViewerRole>("docente")
+
+  // Filter events by the current demo viewer role
+  const visibleEvents = demoViewer === "padre_vacio"
+    ? []
+    : demoViewer === "docente"
+    ? events.filter(e => (e as any).viewerRole === "docente")
+    : events.filter(e => (e as any).viewerRole === demoViewer)
 
   const [newEvent, setNewEvent] = useState({
     title:       "",
@@ -699,10 +714,35 @@ export default function EventosPage() {
           <h1 className="text-2xl font-bold text-[#1E3A5F]">Eventos</h1>
           <p className="text-sm text-[#6B7280]">Gestiona reuniones y solicitudes de apoyo SAANEE.</p>
         </div>
-        <Button className="gap-2 bg-[#1E3A5F] hover:bg-[#2D4A6F] text-white" onClick={() => setIsDialogOpen(true)}>
-          <Plus size={16} />
-          Nuevo evento
-        </Button>
+        {demoViewer === "docente" && (
+          <Button className="gap-2 bg-[#1E3A5F] hover:bg-[#2D4A6F] text-white" onClick={() => setIsDialogOpen(true)}>
+            <Plus size={16} />
+            Nuevo evento
+          </Button>
+        )}
+      </div>
+
+      {/* Demo role switcher */}
+      <div className="flex items-start gap-3 p-3 rounded-lg border border-dashed border-[#D1D5DB] bg-[#F9FAFB]">
+        <div className="shrink-0 mt-0.5">
+          <p className="text-[10px] font-semibold text-[#9CA3AF] uppercase tracking-widest mb-1">Vista demo</p>
+        </div>
+        <div className="flex flex-wrap gap-1.5">
+          {DEMO_ROLES.map(r => (
+            <button
+              key={r.id}
+              onClick={() => setDemoViewer(r.id)}
+              className={`text-xs px-3 py-1.5 rounded-full border transition-all flex flex-col items-start leading-tight ${
+                demoViewer === r.id
+                  ? "bg-[#1E3A5F] border-[#1E3A5F] text-white"
+                  : "bg-white border-[#E5E7EB] text-[#374151] hover:border-[#1E3A5F]"
+              }`}
+            >
+              <span className="font-medium">{r.label}</span>
+              <span className={`text-[10px] ${demoViewer === r.id ? "text-[#93C5FD]" : "text-[#9CA3AF]"}`}>{r.subtitle}</span>
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Week calendar */}
@@ -738,7 +778,7 @@ export default function EventosPage() {
           </div>
           <div className="grid grid-cols-5 gap-2 min-h-[160px]">
             {weekDays.map((day, idx) => {
-              const dayEvents = sortByTime(events.filter(e => e.date === day.toISOString().split("T")[0]))
+              const dayEvents = sortByTime(visibleEvents.filter(e => e.date === day.toISOString().split("T")[0]))
               return (
                 <div key={idx} className="space-y-1.5">
                   {dayEvents.length > 0
@@ -779,7 +819,29 @@ export default function EventosPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            {sortByTime(events).map(ev => {
+            {visibleEvents.length === 0 ? (
+              <div className="flex flex-col items-center py-12 px-6 text-center">
+                <div className="w-16 h-16 rounded-2xl bg-[#F3F4F6] border-2 border-dashed border-[#D1D5DB] flex items-center justify-center mb-4">
+                  <Calendar size={28} className="text-[#D1D5DB]" />
+                </div>
+                <p className="text-sm font-semibold text-[#374151] mb-1">Sin eventos programados</p>
+                <p className="text-xs text-[#9CA3AF] leading-relaxed max-w-[220px]">
+                  {demoViewer === "padre_vacio"
+                    ? "El docente aún no ha programado ninguna reunión contigo."
+                    : "No tienes eventos asignados por el momento."}
+                </p>
+                {demoViewer === "docente" && (
+                  <Button
+                    size="sm"
+                    className="mt-4 bg-[#1E3A5F] hover:bg-[#2D4A6F] text-white text-xs gap-1.5"
+                    onClick={() => setIsDialogOpen(true)}
+                  >
+                    <Plus size={13} />
+                    Crear primer evento
+                  </Button>
+                )}
+              </div>
+            ) : sortByTime(visibleEvents).map(ev => {
               const tc = getEventTypeConfig(ev.type)
               const st = getStatusStyle(ev.status)
               return (
@@ -857,6 +919,7 @@ export default function EventosPage() {
       {selectedEvent && (
         <EventDetailModal
           event={selectedEvent}
+          viewerRole={demoViewer}
           onClose={() => setSelectedEvent(null)}
           onUpdate={handleUpdateEvent}
         />
