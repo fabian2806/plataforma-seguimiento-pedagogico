@@ -489,6 +489,7 @@ export default function ExpedientePage({ params }: { params: Promise<{ id: strin
     tipoDocumentoId: "",
     titulo: "",
     descripcion: "",
+    periodo: "",
     file: null as File | null,
     dragging: false,
   })
@@ -502,7 +503,7 @@ export default function ExpedientePage({ params }: { params: Promise<{ id: strin
   const handleUploadSubmit = () => {
     // In production: upload to storage, create document record
     setUploadModalOpen(false)
-    setUploadForm({ tipoDocumentoId: "", titulo: "", descripcion: "", file: null, dragging: false })
+    setUploadForm({ tipoDocumentoId: "", titulo: "", descripcion: "", periodo: "", file: null, dragging: false })
   }
 
   const selectedTipoDoc = tiposDocumento.find(t => t.id === uploadForm.tipoDocumentoId)
@@ -1485,6 +1486,23 @@ export default function ExpedientePage({ params }: { params: Promise<{ id: strin
                 />
               </div>
 
+              {uploadForm.tipoDocumentoId === "IB" && (
+                <div>
+                  <label className="text-[10px] font-semibold text-[#9CA3AF] uppercase tracking-widest block mb-1.5">
+                    Periodo <span className="text-[#DC2626]">*</span>
+                  </label>
+                  <Input
+                    placeholder="Ej: I Bimestre 2025"
+                    value={uploadForm.periodo}
+                    onChange={e => setUploadForm(f => ({ ...f, periodo: e.target.value }))}
+                    className="border-[#E5E7EB] text-sm h-9"
+                  />
+                  <p className="text-[11px] text-[#9CA3AF] mt-1">
+                    Indica el bimestre y año al que corresponde este informe.
+                  </p>
+                </div>
+              )}
+
               <div>
                 <label className="text-[10px] font-semibold text-[#9CA3AF] uppercase tracking-widest block mb-1.5">
                   Descripción (opcional)
@@ -1560,7 +1578,11 @@ export default function ExpedientePage({ params }: { params: Promise<{ id: strin
             <Button
               size="sm"
               onClick={handleUploadSubmit}
-              disabled={!uploadForm.tipoDocumentoId || !uploadForm.file}
+              disabled={
+                !uploadForm.tipoDocumentoId ||
+                !uploadForm.file ||
+                (uploadForm.tipoDocumentoId === "IB" && !uploadForm.periodo.trim())
+              }
               className="bg-[#1E3A5F] hover:bg-[#2D4A6F] text-white text-xs gap-1.5"
             >
               <Upload size={13} />
