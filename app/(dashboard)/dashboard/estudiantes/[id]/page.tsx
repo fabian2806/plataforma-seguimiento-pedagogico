@@ -35,6 +35,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Separator } from "@/components/ui/separator"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 
 // Mock student data
 const allStudents = [
@@ -481,6 +482,30 @@ export default function ExpedientePage({ params }: { params: Promise<{ id: strin
   })
 
   const selectedType = ENTRY_TYPES.find(t => t.id === entryForm.tipo)
+
+  // Upload document modal state
+  const [uploadModalOpen, setUploadModalOpen] = useState(false)
+  const [uploadForm, setUploadForm] = useState({
+    tipoDocumentoId: "",
+    titulo: "",
+    descripcion: "",
+    file: null as File | null,
+    dragging: false,
+  })
+
+  const handleFileDrop = (e: React.DragEvent) => {
+    e.preventDefault()
+    const file = e.dataTransfer.files[0]
+    if (file) setUploadForm(f => ({ ...f, file, dragging: false }))
+  }
+
+  const handleUploadSubmit = () => {
+    // In production: upload to storage, create document record
+    setUploadModalOpen(false)
+    setUploadForm({ tipoDocumentoId: "", titulo: "", descripcion: "", file: null, dragging: false })
+  }
+
+  const selectedTipoDoc = tiposDocumento.find(t => t.id === uploadForm.tipoDocumentoId)
 
   const handlePublish = () => {
     if (!entryForm.tipo || !entryForm.contenido.trim()) return
@@ -1167,7 +1192,11 @@ export default function ExpedientePage({ params }: { params: Promise<{ id: strin
                   <FolderOpen size={20} className="text-[#3B82F6]" />
                   Documentos de Seguimiento
                 </CardTitle>
-                <Button className="gap-2 bg-[#1E3A5F] hover:bg-[#2D4A6F] text-white" size="sm">
+                <Button
+                  className="gap-2 bg-[#1E3A5F] hover:bg-[#2D4A6F] text-white"
+                  size="sm"
+                  onClick={() => setUploadModalOpen(true)}
+                >
                   <Upload size={14} />
                   Subir documento
                 </Button>
@@ -1381,5 +1410,164 @@ export default function ExpedientePage({ params }: { params: Promise<{ id: strin
         </div>
       </div>
     </div>
+
+    {/* Upload Document Modal */}
+    <Dialog open={uploadModalOpen} onOpenChange={setUploadModalOpen}>
+      <DialogContent className="sm:max-w-[520px]">
+        <DialogHeader>
+          <DialogTitle className="text-base font-semibold text-[#1E3A5F] flex items-center gap-2">
+            <Upload size={16} className="text-[#3B82F6]" />
+            Subir documento
+          </DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-4 pt-1">
+          {/* Step 1: tipo de documento */}
+          <div>
+            <label className="text-[10px] font-semibold text-[#9CA3AF] uppercase tracking-widest block mb-2">
+              Tipo de documento <span className="text-[#DC2626]">*</span>
+            </label>
+            <div className="grid grid-cols-1 gap-1.5">
+              {tiposDocumento.map(tipo => (
+                <button
+                  key={tipo.id}
+                  onClick={() => setUploadForm(f => ({ ...f, tipoDocumentoId: tipo.id }))}
+                  className={`flex items-center justify-between px-3 py-2.5 rounded-lg border text-left transition-all ${
+                    uploadForm.tipoDocumentoId === tipo.id
+                      ? "border-[#3B82F6] bg-[#EFF6FF] ring-1 ring-[#93C5FD]"
+                      : "border-[#E5E7EB] bg-white hover:border-[#93C5FD] hover:bg-[#F8FAFF]"
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <div className={`w-7 h-7 rounded-md flex items-center justify-center text-[10px] font-bold ${
+                      uploadForm.tipoDocumentoId === tipo.id ? "bg-[#3B82F6] text-white" : "bg-[#F3F4F6] text-[#6B7280]"
+                    }`}>
+                      {tipo.id}
+                    </div>
+                    <div>
+                      <p className={`text-sm font-medium ${uploadForm.tipoDocumentoId === tipo.id ? "text-[#1E3A5F]" : "text-[#374151]"}`}>
+                        {tipo.nombre}
+                      </p>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        {tipo.esObligatorio && (
+                          <span className="text-[10px] text-[#DC2626] font-medium">Obligatorio</span>
+                        )}
+                        {tipo.esVersionable && (
+                          <span className="text-[10px] text-[#6B7280]">· Versionable</span>
+                        )}
+                        {tipo.esPeriodico && (
+                          <span className="text-[10px] text-[#6B7280]">· {(tipo as any).periodicidad}</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  {uploadForm.tipoDocumentoId === tipo.id && (
+                    <CheckCircle size={16} className="text-[#3B82F6] shrink-0" />
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Step 2: campos adicionales — solo si hay tipo seleccionado */}
+          {uploadForm.tipoDocumentoId && (
+            <>
+              <div>
+                <label className="text-[10px] font-semibold text-[#9CA3AF] uppercase tracking-widest block mb-1.5">
+                  Título del documento
+                </label>
+                <Input
+                  placeholder={`Ej: ${selectedTipoDoc?.nombre} — ${student.name}`}
+                  value={uploadForm.titulo}
+                  onChange={e => setUploadForm(f => ({ ...f, titulo: e.target.value }))}
+                  className="border-[#E5E7EB] text-sm h-9"
+                />
+              </div>
+
+              <div>
+                <label className="text-[10px] font-semibold text-[#9CA3AF] uppercase tracking-widest block mb-1.5">
+                  Descripción (opcional)
+                </label>
+                <Textarea
+                  placeholder="Añade una nota sobre este documento..."
+                  value={uploadForm.descripcion}
+                  onChange={e => setUploadForm(f => ({ ...f, descripcion: e.target.value }))}
+                  className="border-[#E5E7EB] resize-none h-16 text-sm"
+                />
+              </div>
+
+              {/* Drop zone */}
+              <div>
+                <label className="text-[10px] font-semibold text-[#9CA3AF] uppercase tracking-widest block mb-1.5">
+                  Archivo <span className="text-[#DC2626]">*</span>
+                </label>
+                <div
+                  onDragOver={e => { e.preventDefault(); setUploadForm(f => ({ ...f, dragging: true })) }}
+                  onDragLeave={() => setUploadForm(f => ({ ...f, dragging: false }))}
+                  onDrop={handleFileDrop}
+                  className={`relative flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed py-6 cursor-pointer transition-colors ${
+                    uploadForm.dragging
+                      ? "border-[#3B82F6] bg-[#EFF6FF]"
+                      : uploadForm.file
+                      ? "border-[#6EE7B7] bg-[#ECFDF5]"
+                      : "border-[#E5E7EB] bg-[#F9FAFB] hover:border-[#93C5FD] hover:bg-[#F0F9FF]"
+                  }`}
+                  onClick={() => document.getElementById("doc-file-input")?.click()}
+                >
+                  <input
+                    id="doc-file-input"
+                    type="file"
+                    accept=".pdf,.doc,.docx,.png,.jpg"
+                    className="hidden"
+                    onChange={e => {
+                      const file = e.target.files?.[0]
+                      if (file) setUploadForm(f => ({ ...f, file }))
+                    }}
+                  />
+                  {uploadForm.file ? (
+                    <>
+                      <FileCheck size={22} className="text-[#059669]" />
+                      <p className="text-sm font-medium text-[#059669]">{uploadForm.file.name}</p>
+                      <p className="text-xs text-[#6B7280]">
+                        {(uploadForm.file.size / 1024).toFixed(0)} KB · Haz clic para cambiar
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <Upload size={22} className="text-[#9CA3AF]" />
+                      <p className="text-sm text-[#374151]">
+                        Arrastra el archivo aquí o <span className="text-[#3B82F6] font-medium">busca en tu equipo</span>
+                      </p>
+                      <p className="text-xs text-[#9CA3AF]">PDF, DOC, DOCX, PNG, JPG — máx. 20 MB</p>
+                    </>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Footer */}
+          <div className="flex justify-end gap-2 pt-1">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setUploadModalOpen(false)}
+              className="border-[#E5E7EB] text-[#374151] text-xs"
+            >
+              Cancelar
+            </Button>
+            <Button
+              size="sm"
+              onClick={handleUploadSubmit}
+              disabled={!uploadForm.tipoDocumentoId || !uploadForm.file}
+              className="bg-[#1E3A5F] hover:bg-[#2D4A6F] text-white text-xs gap-1.5"
+            >
+              <Upload size={13} />
+              Subir documento
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   )
 }
