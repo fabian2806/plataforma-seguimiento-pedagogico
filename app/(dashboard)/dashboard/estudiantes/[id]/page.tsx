@@ -551,6 +551,7 @@ export default function ExpedientePage({ params }: { params: Promise<{ id: strin
     : entries.filter(e => e.type === activeFilter)
 
   return (
+    <>
     <div className="p-6 space-y-6">
       {/* Back button and header */}
       <div className="flex items-center gap-4">
@@ -1569,5 +1570,6 @@ export default function ExpedientePage({ params }: { params: Promise<{ id: strin
         </div>
       </DialogContent>
     </Dialog>
+    </>
   )
 }
